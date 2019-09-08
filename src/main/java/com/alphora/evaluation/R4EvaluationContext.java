@@ -14,7 +14,7 @@ public class R4EvaluationContext extends EvaluationContext<PlanDefinition> {
     public R4EvaluationContext(Hook hook, FhirVersionEnum fhirVersion, BaseFhirDataProvider systemProvider,
                                TerminologyProvider terminologyProvider, Context context, PlanDefinition planDefinition)
     {
-        super(hook, fhirVersion, systemProvider, terminologyProvider, context, planDefinition);
+        super(hook, fhirVersion, systemProvider, context, planDefinition);
     }
 
     @Override

@@ -18,7 +18,7 @@ public class Stu3EvaluationContext extends EvaluationContext<PlanDefinition> {
     public Stu3EvaluationContext(Hook hook, FhirVersionEnum fhirVersion, BaseFhirDataProvider systemProvider,
                                  TerminologyProvider terminologyProvider, Context context, PlanDefinition planDefinition)
     {
-        super(hook, fhirVersion, systemProvider, terminologyProvider, context, planDefinition);
+        super(hook, fhirVersion, systemProvider, context, planDefinition);
     }
 
     @Override

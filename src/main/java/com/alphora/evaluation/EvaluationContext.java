@@ -24,7 +24,6 @@ public abstract class EvaluationContext<T extends IBaseResource> {
     private FhirVersionEnum fhirVersion;
     private FhirContext fhirContext;
     private BaseFhirDataProvider systemProvider;
-    private TerminologyProvider terminologyProvider;
     private Context context;
     private T planDefinition;
     private Library library;
@@ -36,15 +35,20 @@ public abstract class EvaluationContext<T extends IBaseResource> {
 
 
     public EvaluationContext(Hook hook, FhirVersionEnum fhirVersion, BaseFhirDataProvider systemProvider,
-                             TerminologyProvider terminologyProvider, Context context, T planDefinition)
+                             Context context, T planDefinition)
     {
         this.hook = hook;
         this.fhirVersion = fhirVersion;
         this.fhirContext = new FhirContext(fhirVersion);
         this.systemProvider = systemProvider;
-        this.terminologyProvider = terminologyProvider;
         this.context = context;
         this.planDefinition = planDefinition;
+
+        if (hook.getRequest().getFhirServerUrl() != null
+                && !systemProvider.getEndpoint().equals(hook.getRequest().getFhirServerUrl()))
+        {
+            context.registerDataProvider("http://hl7.org/fhir", getRemoteProvider());
+        }
     }
 
     public Hook getHook() {
@@ -79,7 +83,9 @@ public abstract class EvaluationContext<T extends IBaseResource> {
 
     public BaseFhirDataProvider getRemoteProvider() {
         if (remoteProvider == null) {
-            if (hook.getRequest().getFhirServerUrl() != null) {
+            if (hook.getRequest().getFhirServerUrl() != null
+                    && !systemProvider.getEndpoint().equals(hook.getRequest().getFhirServerUrl()))
+            {
                 switch (fhirVersion) {
                     case DSTU2:
                         remoteProvider = new FhirDataProviderDstu2().setEndpoint(hook.getRequest().getFhirServerUrl());
@@ -93,7 +99,7 @@ public abstract class EvaluationContext<T extends IBaseResource> {
                     default:
                         throw new NotImplementedException("This CDS Hooks implementation is not configured for FHIR version: " + fhirVersion.getFhirVersionString());
                 }
-                remoteProvider.setTerminologyProvider(terminologyProvider);
+                remoteProvider.setTerminologyProvider(systemProvider.getTerminologyProvider());
             }
             if (hook.getRequest().getFhirAuthorization() != null
                     && hook.getRequest().getFhirAuthorization().getTokenType().equals("Bearer"))
