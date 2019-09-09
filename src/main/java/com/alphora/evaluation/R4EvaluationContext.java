@@ -12,7 +12,7 @@ import java.util.List;
 public class R4EvaluationContext extends EvaluationContext<PlanDefinition> {
 
     public R4EvaluationContext(Hook hook, FhirVersionEnum fhirVersion, BaseFhirDataProvider systemProvider,
-                               TerminologyProvider terminologyProvider, Context context, PlanDefinition planDefinition)
+                               Context context, PlanDefinition planDefinition)
     {
         super(hook, fhirVersion, systemProvider, context, planDefinition);
     }

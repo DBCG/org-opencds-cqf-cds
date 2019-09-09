@@ -1,13 +1,11 @@
 package com.alphora.providers;
 
-import org.hl7.fhir.dstu3.model.PlanDefinition;
-
 import java.util.ArrayList;
 import java.util.List;
 
-public class Discovery {
+public class Discovery<P> {
 
-    private PlanDefinition planDefinition;
+    private P planDefinition;
     private List<DiscoveryItem> items;
     private int count;
 
@@ -16,14 +14,14 @@ public class Discovery {
         count = 0;
     }
 
-    public PlanDefinition getPlanDefinition() {
+    public P getPlanDefinition() {
         return planDefinition;
     }
     public List<DiscoveryItem> getItems() {
         return items;
     }
 
-    public Discovery setPlanDefinition(PlanDefinition planDefinition) {
+    public Discovery setPlanDefinition(P planDefinition) {
         this.planDefinition = planDefinition;
         return this;
     }
