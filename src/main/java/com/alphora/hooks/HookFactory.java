@@ -10,6 +10,7 @@ public class HookFactory {
             case "patient-view": return new PatientViewHook(request);
             case "medication-prescribe": return new MedicationPrescribeHook(request);
             case "order-review": return new OrderReviewHook(request);
+            case "order-select": return new OrderSelectHook(request);
             default: throw new InvalidHookException("Unknown Hook: " + request.getHook());
         }
     }
