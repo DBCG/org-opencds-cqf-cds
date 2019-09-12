@@ -12,7 +12,6 @@ import org.opencds.cqf.cql.data.fhir.FhirDataProviderDstu2;
 import org.opencds.cqf.cql.data.fhir.FhirDataProviderR4;
 import org.opencds.cqf.cql.data.fhir.FhirDataProviderStu3;
 import org.opencds.cqf.cql.execution.Context;
-import org.opencds.cqf.cql.terminology.TerminologyProvider;
 
 import java.io.IOException;
 import java.util.List;
@@ -35,7 +34,7 @@ public abstract class EvaluationContext<T extends IBaseResource> {
 
 
     public EvaluationContext(Hook hook, FhirVersionEnum fhirVersion, BaseFhirDataProvider systemProvider,
-                             Context context, T planDefinition)
+                             Context context, Library library, T planDefinition)
     {
         this.hook = hook;
         this.fhirVersion = fhirVersion;
@@ -43,6 +42,7 @@ public abstract class EvaluationContext<T extends IBaseResource> {
         this.systemProvider = systemProvider;
         this.context = context;
         this.planDefinition = planDefinition;
+        this.library = library;
 
         if (hook.getRequest().getFhirServerUrl() != null
                 && !systemProvider.getEndpoint().equals(hook.getRequest().getFhirServerUrl()))
@@ -81,7 +81,7 @@ public abstract class EvaluationContext<T extends IBaseResource> {
         return library;
     }
 
-    public BaseFhirDataProvider getRemoteProvider() {
+    private BaseFhirDataProvider getRemoteProvider() {
         if (remoteProvider == null) {
             if (hook.getRequest().getFhirServerUrl() != null
                     && !systemProvider.getEndpoint().equals(hook.getRequest().getFhirServerUrl()))
@@ -124,7 +124,7 @@ public abstract class EvaluationContext<T extends IBaseResource> {
         if (contextResources == null) {
             contextResources = EvaluationHelper.resolveContextResources(hook.getContextResources(), fhirContext);
             if (hook.getRequest().isApplyCql()) {
-                applyCqlToResources(contextResources);
+                contextResources = applyCqlToResources(contextResources);
             }
         }
         return contextResources;
@@ -139,12 +139,12 @@ public abstract class EvaluationContext<T extends IBaseResource> {
                             getRemoteProvider() == null ? systemProvider.getFhirClient() : getRemoteProvider().getFhirClient()
                     );
             if (hook.getRequest().isApplyCql()) {
-                applyCqlToResources(prefetchResources);
+                prefetchResources = applyCqlToResources(prefetchResources);
             }
         }
         return prefetchResources;
     }
 
     // NOTE: This is an operation defined in the cqf-ruler
-    abstract void applyCqlToResources(List<Object> resources);
+    abstract List<Object> applyCqlToResources(List<Object> resources);
 }

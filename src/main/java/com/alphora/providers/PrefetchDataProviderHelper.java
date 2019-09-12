@@ -29,6 +29,16 @@ public class PrefetchDataProviderHelper {
                     prefetchResources.put(((Resource) resource).fhirType(), resourceList);
                 }
             }
+            else if (resource instanceof org.hl7.fhir.r4.model.Resource) {
+                if (prefetchResources.containsKey(((org.hl7.fhir.r4.model.Resource) resource).fhirType())) {
+                    prefetchResources.get(((org.hl7.fhir.r4.model.Resource) resource).fhirType()).add(resource);
+                }
+                else {
+                    List<Object> resourceList = new ArrayList<>();
+                    resourceList.add(resource);
+                    prefetchResources.put(((org.hl7.fhir.r4.model.Resource) resource).fhirType(), resourceList);
+                }
+            }
             else if (resource instanceof ca.uhn.fhir.model.dstu2.resource.BaseResource) {
                 if (prefetchResources.containsKey(((ca.uhn.fhir.model.dstu2.resource.BaseResource) resource).getResourceName())) {
                     prefetchResources.get(((ca.uhn.fhir.model.dstu2.resource.BaseResource) resource).getResourceName()).add(resource);
