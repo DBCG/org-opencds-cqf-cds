@@ -88,13 +88,13 @@ public abstract class EvaluationContext<T extends IBaseResource> {
             {
                 switch (fhirVersion) {
                     case DSTU2:
-                        remoteProvider = new FhirDataProviderDstu2().setEndpoint(hook.getRequest().getFhirServerUrl());
+                        remoteProvider = new FhirDataProviderDstu2().setEndpoint(hook.getRequest().getFhirServerUrl()).setSearchUsingPOST(true);
                         break;
                     case DSTU3:
-                        remoteProvider = new FhirDataProviderStu3().setEndpoint(hook.getRequest().getFhirServerUrl());
+                        remoteProvider = new FhirDataProviderStu3().setEndpoint(hook.getRequest().getFhirServerUrl()).setSearchUsingPOST(true);
                         break;
                     case R4:
-                        remoteProvider = new FhirDataProviderR4().setEndpoint(hook.getRequest().getFhirServerUrl());
+                        remoteProvider = new FhirDataProviderR4().setEndpoint(hook.getRequest().getFhirServerUrl()).setSearchUsingPOST(true);
                         break;
                     default:
                         throw new NotImplementedException("This CDS Hooks implementation is not configured for FHIR version: " + fhirVersion.getFhirVersionString());

@@ -112,7 +112,7 @@ public class PrefetchDataProviderR4 extends FhirDataProviderR4 {
                 if (codeOrDatePath.contains("code")) return "substance";
                 break;
             case "MedicationRequest":
-                if (codeOrDatePath.equals("code")) return "medicationCodeableConcept";
+                if (codeOrDatePath.equals("medication")) return "medicationCodeableConcept";
                 break;
             case "Observation":
                 // this is a tricky one! todo - need to also check component.code
