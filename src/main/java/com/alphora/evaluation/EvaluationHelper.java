@@ -2,6 +2,7 @@ package com.alphora.evaluation;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
+import ca.uhn.fhir.rest.api.SearchStyleEnum;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import com.alphora.hooks.Hook;
 import com.alphora.request.JsonHelper;
@@ -15,6 +16,8 @@ import java.io.IOException;
 import java.util.*;
 
 public class EvaluationHelper {
+
+    private static final int URI_MAX_LENGTH = 8192;
 
     // This method is very forgiving. Accepts: JSON Object, JSON Array, or JSON String
     public static List<Object> resolveContextResources(JsonElement contextJson, FhirContext fhirContext) {
@@ -84,6 +87,14 @@ public class EvaluationHelper {
         return resources;
     }
 
+    public static List<Object> resolveBundle(List<IBaseResource> bundles, FhirContext fhirContext) {
+        List<Object> ret = new ArrayList<>();
+        for (IBaseResource bundle : bundles) {
+            ret.addAll(resolveBundle(bundle, fhirContext));
+        }
+        return ret;
+    }
+
     public static List<Object> resolvePrefetchResources(Hook hook, FhirContext fhirContext, IGenericClient client) throws IOException {
         List<Object> prefetchResources = new ArrayList<>();
         List<String> prefetchElementsToFetch = new ArrayList<>();
@@ -109,8 +120,26 @@ public class EvaluationHelper {
 
         for (String elementToFetch : prefetchElementsToFetch) {
             String prefetchUrl = JsonHelper.getStringRequired(hook.getRequest().getPrefetch().getDiscoveryPrefetchJson(), elementToFetch);
-            IBaseBundle bundle = client.search().forResource(getResourceName(prefetchUrl)).whereMap(getParameterMap(prefetchUrl, hook)).execute();
-            prefetchResources.addAll(resolveBundle(bundle, fhirContext));
+            ParameterMapHelper mapHelper = new ParameterMapHelper(prefetchUrl, hook);
+            Map<String, List<String>> map = mapHelper.getParameterMap();
+            if (mapHelper.isCompoundSearch()) {
+                List<IBaseResource> bundles = new ArrayList<>();
+                int count = 0;
+                while (count < map.get(mapHelper.getCompoundParam()).size()) {
+                    bundles.add(
+                            client.search()
+                                    .forResource(getResourceName(prefetchUrl))
+                                    .whereMap(mapHelper.getParameterMapCompundIncludeIndex(count))
+                                    .usingStyle(SearchStyleEnum.POST).execute()
+                    );
+                    ++count;
+                }
+                prefetchResources.addAll(resolveBundle(bundles, fhirContext));
+            }
+            else {
+                IBaseBundle bundle = client.search().forResource(getResourceName(prefetchUrl)).whereMap(map).usingStyle(SearchStyleEnum.POST).execute();
+                prefetchResources.addAll(resolveBundle(bundle, fhirContext));
+            }
         }
 
         return prefetchResources;
@@ -120,23 +149,36 @@ public class EvaluationHelper {
         return prefetchUrl.split("\\?")[0];
     }
 
-    public static Map<String, List<String>> getParameterMap(String prefetchUrl, Hook hook) {
-        Map<String, List<String>> parameterMap = new HashMap<>();
-        String cleanUrl =
-                prefetchUrl.replaceAll("\\{\\{context.patientId}}", hook.getRequest().getContext().getPatientId())
-                        .replaceAll("\\{\\{context.encounterId}}", hook.getRequest().getContext().getEncounterId())
-                        .replaceAll("\\{\\{context.user}}", hook.getRequest().getUser())
-                        .replaceAll("\\{\\{user}}", hook.getRequest().getUser());
-        String[] temp = cleanUrl.split("\\?");
-        if (temp.length > 1) {
-            temp = temp[1].split("&");
-            for (String t : temp) {
-                String[] tArr = t.split("=");
-                if (tArr.length == 2) {
-                    parameterMap.put(tArr[0], Collections.singletonList(tArr[1]));
-                }
-            }
-        }
-        return parameterMap;
-    }
+//    public static Map<String, List<String>> getParameterMap(String prefetchUrl, Hook hook) {
+//        Map<String, List<String>> parameterMap = new HashMap<>();
+//        String cleanUrl =
+//                prefetchUrl.replaceAll("\\{\\{context.patientId}}", hook.getRequest().getContext().getPatientId())
+//                        .replaceAll("\\{\\{context.encounterId}}", hook.getRequest().getContext().getEncounterId())
+//                        .replaceAll("\\{\\{context.user}}", hook.getRequest().getUser())
+//                        .replaceAll("\\{\\{user}}", hook.getRequest().getUser());
+//        String[] temp = cleanUrl.split("\\?");
+//        if (temp.length > 1) {
+//            temp = temp[1].split("&");
+//            for (String t : temp) {
+//                String[] tArr = t.split("=");
+//                if (tArr.length == 2) {
+//                    if (tArr[1].length() > URI_MAX_LENGTH) {
+//                        String s = "";
+//                        String[] sArr = tArr[1].split(",");
+//                        for (String ss : sArr) {
+//                            String tmp = s + "," + ss;
+//                            if (tmp.length() < URI_MAX_LENGTH) {
+//                                s = tmp;
+//                            }
+//                            else {
+//
+//                            }
+//                        }
+//                    }
+//                    parameterMap.put(tArr[0], Collections.singletonList(tArr[1]));
+//                }
+//            }
+//        }
+//        return parameterMap;
+//    }
 }
