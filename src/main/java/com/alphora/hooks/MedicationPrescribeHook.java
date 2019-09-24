@@ -1,5 +1,7 @@
 package com.alphora.hooks;
 
+import com.alphora.exceptions.MissingRequiredFieldException;
+import com.alphora.request.JsonHelper;
 import com.alphora.request.Request;
 import com.google.gson.JsonElement;
 
@@ -11,6 +13,6 @@ public class MedicationPrescribeHook extends Hook {
 
     @Override
     public JsonElement getContextResources() {
-        return getRequest().getContext().getResourceElement("medications");
+        return JsonHelper.getObjectRequired(getRequest().getContext().getContextJson(), "medications");
     }
 }
