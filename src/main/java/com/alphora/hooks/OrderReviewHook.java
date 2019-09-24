@@ -1,5 +1,6 @@
 package com.alphora.hooks;
 
+import com.alphora.exceptions.MissingRequiredFieldException;
 import com.alphora.request.Request;
 import com.google.gson.JsonElement;
 
@@ -11,6 +12,12 @@ public class OrderReviewHook extends Hook {
 
     @Override
     public JsonElement getContextResources() {
-        return getRequest().getContext().getResourceElement("orders");
+        JsonElement ordersElement = getRequest().getContext().getResourceElement("orders");
+
+        if (ordersElement == null) {
+            throw new MissingRequiredFieldException("orders is required but not found.");
+        }
+
+        return ordersElement;
     }
 }
