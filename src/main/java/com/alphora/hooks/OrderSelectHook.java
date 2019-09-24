@@ -13,6 +13,6 @@ public class OrderSelectHook extends Hook {
 
     @Override
     public JsonElement getContextResources() {
-        return JsonHelper.getObjectRequired(getRequest().getRequestJson(), "draftOrders");
+        return JsonHelper.getObjectRequired(getRequest().getContext().getContextJson(), "draftOrders");
     }
 }

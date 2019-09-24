@@ -13,6 +13,6 @@ public class MedicationPrescribeHook extends Hook {
 
     @Override
     public JsonElement getContextResources() {
-        return JsonHelper.getObjectRequired(getRequest().getRequestJson(), "medications");
+        return JsonHelper.getObjectRequired(getRequest().getContext().getContextJson(), "medications");
     }
 }
