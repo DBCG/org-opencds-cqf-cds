@@ -2,7 +2,7 @@ package com.alphora.providers;
 
 import ca.uhn.fhir.rest.gclient.DateClientParam;
 import ca.uhn.fhir.rest.gclient.TokenClientParam;
-import org.opencds.cqf.cql.data.fhir.BaseFhirDataProvider;
+import org.opencds.cqf.cql.retrieve.TerminologyAwareRetrieveProvider;
 import org.opencds.cqf.cql.runtime.Code;
 import org.opencds.cqf.cql.runtime.Interval;
 import org.opencds.cqf.cql.terminology.ValueSetInfo;
@@ -13,7 +13,7 @@ import java.util.List;
 
 import static org.hl7.fhir.utilities.Utilities.URLEncode;
 
-public abstract class DiscoveryDataProvider extends BaseFhirDataProvider {
+public abstract class DiscoveryDataProvider extends TerminologyAwareRetrieveProvider {
 
     private Discovery discovery;
     private List<Retrieve> retrieveCache;
@@ -30,7 +30,7 @@ public abstract class DiscoveryDataProvider extends BaseFhirDataProvider {
     public abstract String convertPathToSearchParam(String dataType, String codeOrDatePath);
 
     @Override
-    public Iterable<Object> retrieve(String context, Object contextValue, String dataType, String templateId,
+    public Iterable<Object> retrieve(String context, String contextPath, Object contextValue, String dataType, String templateId,
                                      String codePath, Iterable<Code> codes, String valueSet, String datePath,
                                      String dateLowPath, String dateHighPath, Interval dateRange)
     {
@@ -146,7 +146,6 @@ public abstract class DiscoveryDataProvider extends BaseFhirDataProvider {
         return Collections.emptyList();
     }
 
-    @Override
     public String getPatientSearchParam(String dataType) {
         switch (dataType) {
             case "Composition": return "subject";
@@ -159,20 +158,5 @@ public abstract class DiscoveryDataProvider extends BaseFhirDataProvider {
             case "ProcessResponse": case "Questionnaire": case "Substance": return null;
             default: return "patient";
         }
-    }
-
-    @Override
-    protected String resolveClassName(String s) {
-        return null;
-    }
-
-    @Override
-    protected Object fromJavaPrimitive(Object o, Object o1) {
-        return null;
-    }
-
-    @Override
-    protected Object toJavaPrimitive(Object o, Object o1) {
-        return null;
     }
 }

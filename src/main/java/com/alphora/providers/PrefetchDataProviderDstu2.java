@@ -1,9 +1,10 @@
 package com.alphora.providers;
 
-import ca.uhn.fhir.context.FhirContext;
-import org.opencds.cqf.cql.data.fhir.FhirDataProviderDstu2;
 import org.opencds.cqf.cql.elm.execution.InEvaluator;
 import org.opencds.cqf.cql.elm.execution.IncludesEvaluator;
+import org.opencds.cqf.cql.model.Dstu2FhirModelResolver;
+import org.opencds.cqf.cql.model.ModelResolver;
+import org.opencds.cqf.cql.retrieve.TerminologyAwareRetrieveProvider;
 import org.opencds.cqf.cql.runtime.Code;
 import org.opencds.cqf.cql.runtime.DateTime;
 import org.opencds.cqf.cql.runtime.Interval;
@@ -11,18 +12,18 @@ import org.opencds.cqf.cql.terminology.ValueSetInfo;
 
 import java.util.*;
 
-public class PrefetchDataProviderDstu2 extends FhirDataProviderDstu2 {
+public class PrefetchDataProviderDstu2 extends TerminologyAwareRetrieveProvider {
 
     private Map<String, List<Object>> prefetchResources;
+    private ModelResolver resolver;
 
     public PrefetchDataProviderDstu2(List<Object> resources) {
         prefetchResources = PrefetchDataProviderHelper.populateMap(resources);
-        setPackageName("ca.uhn.fhir.model.dstu2.resource");
-        setFhirContext(FhirContext.forDstu2());
+        this.resolver = new Dstu2FhirModelResolver();
     }
 
     @Override
-    public Iterable<Object> retrieve(String context, Object contextValue, String dataType, String templateId,
+    public Iterable<Object> retrieve(String context, String contextPath, Object contextValue, String dataType, String templateId,
                                      String codePath, Iterable<Code> codes, String valueSet, String datePath,
                                      String dateLowPath, String dateHighPath, Interval dateRange)
     {
@@ -54,7 +55,7 @@ public class PrefetchDataProviderDstu2 extends FhirDataProviderDstu2 {
                         throw new IllegalArgumentException("If the datePath is specified, the dateLowPath and dateHighPath attributes must not be present.");
                     }
 
-                    Object dateObject = PrefetchDataProviderHelper.getDstu2DateTime(resolvePath(resource, datePath));
+                    Object dateObject = PrefetchDataProviderHelper.getDstu2DateTime(this.resolver.resolvePath(resource, datePath));
                     DateTime date = dateObject instanceof DateTime ? (DateTime) dateObject : null;
                     Interval dateInterval = dateObject instanceof Interval ? (Interval) dateObject : null;
                     String precision = PrefetchDataProviderHelper.getPrecision(Arrays.asList(dateRange, date));
@@ -72,8 +73,8 @@ public class PrefetchDataProviderDstu2 extends FhirDataProviderDstu2 {
                         throw new IllegalArgumentException("If the datePath is not given, either the lowDatePath or highDatePath must be provided.");
                     }
 
-                    DateTime lowDate = dateLowPath == null ? null : (DateTime) PrefetchDataProviderHelper.getDstu2DateTime(resolvePath(resource, dateLowPath));
-                    DateTime highDate = dateHighPath == null ? null : (DateTime) PrefetchDataProviderHelper.getDstu2DateTime(resolvePath(resource, dateHighPath));
+                    DateTime lowDate = dateLowPath == null ? null : (DateTime) PrefetchDataProviderHelper.getDstu2DateTime(this.resolver.resolvePath(resource, dateLowPath));
+                    DateTime highDate = dateHighPath == null ? null : (DateTime) PrefetchDataProviderHelper.getDstu2DateTime(this.resolver.resolvePath(resource, dateHighPath));
 
                     String precision = PrefetchDataProviderHelper.getPrecision(Arrays.asList(dateRange, lowDate, highDate));
 
@@ -95,7 +96,7 @@ public class PrefetchDataProviderDstu2 extends FhirDataProviderDstu2 {
                     codes = terminologyProvider.expand(valueSetInfo);
                 }
                 if (codes != null) {
-                    Object codeObject = PrefetchDataProviderHelper.getDstu2Code(resolvePath(resource, convertPathFromCodeParam(dataType, codePath)));
+                    Object codeObject = PrefetchDataProviderHelper.getDstu2Code(this.resolver.resolvePath(resource, convertPathFromCodeParam(dataType, codePath)));
                     includeResource = PrefetchDataProviderHelper.checkCodeMembership(codes, codeObject);
                 }
             }

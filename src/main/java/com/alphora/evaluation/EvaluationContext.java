@@ -1,20 +1,31 @@
 package com.alphora.evaluation;
 
-import org.cqframework.cql.elm.execution.Library;
-import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.context.FhirVersionEnum;
-import ca.uhn.fhir.rest.client.interceptor.BearerTokenAuthInterceptor;
-import com.alphora.exceptions.NotImplementedException;
-import com.alphora.hooks.Hook;
-import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.opencds.cqf.cql.data.fhir.BaseFhirDataProvider;
-import org.opencds.cqf.cql.data.fhir.FhirDataProviderDstu2;
-import org.opencds.cqf.cql.data.fhir.FhirDataProviderR4;
-import org.opencds.cqf.cql.data.fhir.FhirDataProviderStu3;
-import org.opencds.cqf.cql.execution.Context;
-
 import java.io.IOException;
 import java.util.List;
+
+import com.alphora.exceptions.NotImplementedException;
+import com.alphora.hooks.Hook;
+
+import org.cqframework.cql.elm.execution.Library;
+import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.opencds.cqf.cql.data.CompositeDataProvider;
+import org.opencds.cqf.cql.data.DataProvider;
+import org.opencds.cqf.cql.execution.Context;
+import org.opencds.cqf.cql.model.Dstu2FhirModelResolver;
+import org.opencds.cqf.cql.model.Dstu3FhirModelResolver;
+import org.opencds.cqf.cql.model.ModelResolver;
+import org.opencds.cqf.cql.model.R4FhirModelResolver;
+import org.opencds.cqf.cql.retrieve.RestFhirRetrieveProvider;
+import org.opencds.cqf.cql.terminology.fhir.FhirTerminologyProvider;
+
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.FhirVersionEnum;
+import ca.uhn.fhir.jpa.searchparam.registry.ISearchParamRegistry;
+import ca.uhn.fhir.jpa.searchparam.registry.SearchParamRegistryDstu2;
+import ca.uhn.fhir.jpa.searchparam.registry.SearchParamRegistryDstu3;
+import ca.uhn.fhir.jpa.searchparam.registry.SearchParamRegistryR4;
+import ca.uhn.fhir.rest.client.api.IGenericClient;
+import ca.uhn.fhir.rest.client.interceptor.BearerTokenAuthInterceptor;
 
 public abstract class EvaluationContext<T extends IBaseResource> {
 
@@ -22,33 +33,38 @@ public abstract class EvaluationContext<T extends IBaseResource> {
     private Hook hook;
     private FhirVersionEnum fhirVersion;
     private FhirContext fhirContext;
-    private BaseFhirDataProvider systemProvider;
+    private DataProvider systemProvider;
     private Context context;
     private T planDefinition;
     private Library library;
 
     // Requires resolution
-    private BaseFhirDataProvider remoteProvider;
+    private DataProvider remoteProvider;
     private List<Object> contextResources;
     private List<Object> prefetchResources;
 
+    private IGenericClient client;
 
-    public EvaluationContext(Hook hook, FhirVersionEnum fhirVersion, BaseFhirDataProvider systemProvider,
+
+    public EvaluationContext(Hook hook, FhirVersionEnum fhirVersion, IGenericClient fhirClient,
                              Context context, Library library, T planDefinition)
     {
+
+        // How to determine if it's a local server?
+        // Local Server url?
+        // Need a DataRetriever for that.
+        // Otherwise, it's a remote data retriver.
+
         this.hook = hook;
         this.fhirVersion = fhirVersion;
         this.fhirContext = new FhirContext(fhirVersion);
-        this.systemProvider = systemProvider;
         this.context = context;
         this.planDefinition = planDefinition;
         this.library = library;
 
-        if (hook.getRequest().getFhirServerUrl() != null
-                && !systemProvider.getEndpoint().equals(hook.getRequest().getFhirServerUrl()))
-        {
-            context.registerDataProvider("http://hl7.org/fhir", getRemoteProvider());
-        }
+        this.client = fhirClient;
+
+        context.registerDataProvider("http://hl7.org/fhir", getDataProvider());
     }
 
     public Hook getHook() {
@@ -63,7 +79,7 @@ public abstract class EvaluationContext<T extends IBaseResource> {
         return fhirContext;
     }
 
-    public BaseFhirDataProvider getSystemProvider() {
+    public DataProvider getSystemProvider() {
         return systemProvider;
     }
 
@@ -81,34 +97,33 @@ public abstract class EvaluationContext<T extends IBaseResource> {
         return library;
     }
 
-    private BaseFhirDataProvider getRemoteProvider() {
+    private DataProvider getDataProvider() {
         if (remoteProvider == null) {
-            if (hook.getRequest().getFhirServerUrl() != null
-                    && !systemProvider.getEndpoint().equals(hook.getRequest().getFhirServerUrl()))
-            {
-                switch (fhirVersion) {
-                    case DSTU2:
-                        remoteProvider = new FhirDataProviderDstu2().setEndpoint(hook.getRequest().getFhirServerUrl()).setSearchUsingPOST(true);
-                        break;
-                    case DSTU3:
-                        remoteProvider = new FhirDataProviderStu3().setEndpoint(hook.getRequest().getFhirServerUrl()).setSearchUsingPOST(true);
-                        break;
-                    case R4:
-                        remoteProvider = new FhirDataProviderR4().setEndpoint(hook.getRequest().getFhirServerUrl()).setSearchUsingPOST(true);
-                        break;
-                    default:
-                        throw new NotImplementedException("This CDS Hooks implementation is not configured for FHIR version: " + fhirVersion.getFhirVersionString());
-                }
-                remoteProvider.setTerminologyProvider(systemProvider.getTerminologyProvider());
-            }
-            if (hook.getRequest().getFhirAuthorization() != null
-                    && hook.getRequest().getFhirAuthorization().getTokenType().equals("Bearer"))
-            {
-                BearerTokenAuthInterceptor authInterceptor = new BearerTokenAuthInterceptor(hook.getRequest().getFhirAuthorization().getAccessToken());
-                remoteProvider.getFhirClient().registerInterceptor(authInterceptor);
+            ModelResolver resolver;
 
-                // TODO: account for the expires_in, scope and subject properties within workflow
+            // TODO: Need to factor out all the SearchParamRegistry stuff.
+            ISearchParamRegistry registry;
+            switch (fhirVersion) {
+                case DSTU2:
+                    resolver = new Dstu2FhirModelResolver();
+                    registry = new SearchParamRegistryDstu2();
+                    break;
+                case DSTU3:
+                    resolver = new Dstu3FhirModelResolver();
+                    registry = new SearchParamRegistryDstu3();
+                    break;
+                case R4:
+                    resolver = new R4FhirModelResolver();
+                    registry = new SearchParamRegistryR4();
+                    break;
+                default:
+                    throw new NotImplementedException("This CDS Hooks implementation is not configured for FHIR version: " + fhirVersion.getFhirVersionString());
             }
+
+            RestFhirRetrieveProvider provider = new RestFhirRetrieveProvider(registry, this.getHookFhirClient());
+            provider.setTerminologyProvider(new FhirTerminologyProvider(this.getSystemFhirClient()));
+
+            this.remoteProvider = new CompositeDataProvider(resolver, provider);
         }
         return remoteProvider;
     }
@@ -136,13 +151,30 @@ public abstract class EvaluationContext<T extends IBaseResource> {
                     EvaluationHelper.resolvePrefetchResources(
                             hook,
                             fhirContext,
-                            getRemoteProvider() == null ? systemProvider.getFhirClient() : getRemoteProvider().getFhirClient()
+                            this.getHookFhirClient()
                     );
             if (hook.getRequest().isApplyCql()) {
                 prefetchResources = applyCqlToResources(prefetchResources);
             }
         }
         return prefetchResources;
+    }
+
+    public IGenericClient getSystemFhirClient() {
+        return this.client;
+    }
+
+    protected IGenericClient getHookFhirClient() {
+        IGenericClient client = this.fhirContext.newRestfulGenericClient(this.hook.getRequest().getFhirServerUrl());
+        if (this.hook.getRequest().getFhirAuthorization() != null
+                    && hook.getRequest().getFhirAuthorization().getTokenType().equals("Bearer")) {
+            BearerTokenAuthInterceptor authInterceptor = new BearerTokenAuthInterceptor(hook.getRequest().getFhirAuthorization().getAccessToken());
+            client.registerInterceptor(authInterceptor);
+
+            // TODO: account for the expires_in, scope and subject properties within workflow
+        }
+
+        return client;
     }
 
     // NOTE: This is an operation defined in the cqf-ruler

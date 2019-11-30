@@ -1,11 +1,13 @@
 package com.alphora.hooks;
 
 import ca.uhn.fhir.model.primitive.IdDt;
+import ca.uhn.fhir.rest.client.api.IGenericClient;
+
 import com.alphora.builders.r4.*;
 import com.alphora.response.CdsCard;
 import com.alphora.response.R4CarePlanToCdsCard;
 import org.hl7.fhir.r4.model.*;
-import org.opencds.cqf.cql.data.fhir.BaseFhirDataProvider;
+import org.opencds.cqf.cql.data.DataProvider;
 import org.opencds.cqf.cql.execution.Context;
 
 import javax.xml.namespace.QName;
@@ -17,7 +19,7 @@ import java.util.UUID;
 public class R4HookEvaluator extends BaseHookEvaluator<PlanDefinition> {
 
     @Override
-    public List<CdsCard> evaluateCdsHooksPlanDefinition(Context context, PlanDefinition planDefinition, String patientId) {
+    public List<CdsCard> evaluateCdsHooksPlanDefinition(Context context, PlanDefinition planDefinition, String patientId, IGenericClient applyClient) {
         CarePlanBuilder carePlanBuilder = new CarePlanBuilder();
         RequestGroupBuilder requestGroupBuilder = new RequestGroupBuilder().buildStatus().buildIntent();
 
@@ -43,7 +45,7 @@ public class R4HookEvaluator extends BaseHookEvaluator<PlanDefinition> {
             requestGroupBuilder.buildExtension(extensions);
         }
 
-        resolveActions(planDefinition.getAction(), context, patientId, requestGroupBuilder, new ArrayList<>());
+        resolveActions(planDefinition.getAction(), context, patientId, requestGroupBuilder, new ArrayList<>(), applyClient);
 
         CarePlanActivityBuilder carePlanActivityBuilder = new CarePlanActivityBuilder();
         carePlanActivityBuilder.buildReferenceTarget(requestGroupBuilder.build());
@@ -54,7 +56,7 @@ public class R4HookEvaluator extends BaseHookEvaluator<PlanDefinition> {
 
     private void resolveActions(List<PlanDefinition.PlanDefinitionActionComponent> actions, Context context,
                                 String patientId, RequestGroupBuilder requestGroupBuilder,
-                                List<RequestGroup.RequestGroupActionComponent> actionComponents)
+                                List<RequestGroup.RequestGroupActionComponent> actionComponents, IGenericClient applyClient)
     {
         for (PlanDefinition.PlanDefinitionActionComponent action : actions) {
             boolean conditionsMet = true;
@@ -112,10 +114,9 @@ public class R4HookEvaluator extends BaseHookEvaluator<PlanDefinition> {
                     }
                     if (action.hasDefinition()) {
                         if (action.getDefinitionCanonicalType().getValue().startsWith("ActivityDefinition")) {
-                            BaseFhirDataProvider provider = (BaseFhirDataProvider) context.resolveDataProvider(new QName("http://hl7.org/fhir", ""));
                             Parameters inParams = new Parameters();
                             inParams.addParameter().setName("patient").setValue(new StringType(patientId));
-                            Parameters outParams = provider.getFhirClient()
+                            Parameters outParams = applyClient
                                     .operation()
                                     .onInstance(new IdDt(action.getDefinitionCanonicalType().getValue()))
                                     .named("$apply")
@@ -156,7 +157,7 @@ public class R4HookEvaluator extends BaseHookEvaluator<PlanDefinition> {
                     }
 
                     if (action.hasAction()) {
-                        resolveActions(action.getAction(), context, patientId, requestGroupBuilder, actionComponents);
+                        resolveActions(action.getAction(), context, patientId, requestGroupBuilder, actionComponents, applyClient);
                     }
                 }
             }
