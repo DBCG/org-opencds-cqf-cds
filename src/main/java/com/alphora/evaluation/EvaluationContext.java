@@ -16,7 +16,9 @@ import org.opencds.cqf.cql.model.Dstu3FhirModelResolver;
 import org.opencds.cqf.cql.model.ModelResolver;
 import org.opencds.cqf.cql.model.R4FhirModelResolver;
 import org.opencds.cqf.cql.retrieve.RestFhirRetrieveProvider;
-import org.opencds.cqf.cql.terminology.fhir.FhirTerminologyProvider;
+import org.opencds.cqf.cql.terminology.TerminologyProvider;
+import org.opencds.cqf.cql.terminology.fhir.Dstu3FhirTerminologyProvider;
+import org.opencds.cqf.cql.terminology.fhir.R4FhirTerminologyProvider;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
@@ -26,6 +28,7 @@ import ca.uhn.fhir.jpa.searchparam.registry.SearchParamRegistryDstu3;
 import ca.uhn.fhir.jpa.searchparam.registry.SearchParamRegistryR4;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.client.interceptor.BearerTokenAuthInterceptor;
+import org.opencds.cqf.cql.terminology.fhir.R4FhirTerminologyProvider;
 
 public abstract class EvaluationContext<T extends IBaseResource> {
 
@@ -103,25 +106,29 @@ public abstract class EvaluationContext<T extends IBaseResource> {
 
             // TODO: Need to factor out all the SearchParamRegistry stuff.
             ISearchParamRegistry registry;
+            TerminologyProvider terminologyProvider;
             switch (fhirVersion) {
                 case DSTU2:
                     resolver = new Dstu2FhirModelResolver();
                     registry = new SearchParamRegistryDstu2();
+                    terminologyProvider = new Dstu3FhirTerminologyProvider(this.getSystemFhirClient());
                     break;
                 case DSTU3:
                     resolver = new Dstu3FhirModelResolver();
                     registry = new SearchParamRegistryDstu3();
+                    terminologyProvider = new Dstu3FhirTerminologyProvider(this.getSystemFhirClient());
                     break;
                 case R4:
                     resolver = new R4FhirModelResolver();
                     registry = new SearchParamRegistryR4();
+                    terminologyProvider = new R4FhirTerminologyProvider(this.getSystemFhirClient());
                     break;
                 default:
                     throw new NotImplementedException("This CDS Hooks implementation is not configured for FHIR version: " + fhirVersion.getFhirVersionString());
             }
 
             RestFhirRetrieveProvider provider = new RestFhirRetrieveProvider(registry, this.getHookFhirClient());
-            provider.setTerminologyProvider(new FhirTerminologyProvider(this.getSystemFhirClient()));
+            provider.setTerminologyProvider(terminologyProvider);
 
             this.remoteProvider = new CompositeDataProvider(resolver, provider);
         }
