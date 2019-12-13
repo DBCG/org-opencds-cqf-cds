@@ -96,7 +96,7 @@ public class PrefetchDataProviderDstu2 extends TerminologyAwareRetrieveProvider 
                     codes = terminologyProvider.expand(valueSetInfo);
                 }
                 if (codes != null) {
-                    Object codeObject = PrefetchDataProviderHelper.getDstu2Code(this.resolver.resolvePath(resource, convertPathFromCodeParam(dataType, codePath)));
+                    Object codeObject = PrefetchDataProviderHelper.getDstu2Code(this.resolver.resolvePath(resource,  codePath));
                     includeResource = PrefetchDataProviderHelper.checkCodeMembership(codes, codeObject);
                 }
             }
@@ -107,14 +107,5 @@ public class PrefetchDataProviderDstu2 extends TerminologyAwareRetrieveProvider 
         }
 
         return returnList;
-    }
-
-    private String convertPathFromCodeParam(String dataType, String codeOrDatePath) {
-        switch (dataType) {
-            case "MedicationOrder":
-                if (codeOrDatePath.equals("code")) return "medication";
-                break;
-        }
-        return codeOrDatePath;
     }
 }

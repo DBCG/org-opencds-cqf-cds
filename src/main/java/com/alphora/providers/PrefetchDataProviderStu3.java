@@ -94,7 +94,7 @@ public class PrefetchDataProviderStu3 extends TerminologyAwareRetrieveProvider {
                     codes = terminologyProvider.expand(valueSetInfo);
                 }
                 if (codes != null) {
-                    Object codeObject = PrefetchDataProviderHelper.getStu3Code(this.resolver.resolvePath(resource, convertPathFromCodeParam(dataType, codePath)));
+                    Object codeObject = PrefetchDataProviderHelper.getStu3Code(this.resolver.resolvePath(resource, codePath));
                     includeResource = PrefetchDataProviderHelper.checkCodeMembership(codes, codeObject);
                 }
             }
@@ -105,21 +105,5 @@ public class PrefetchDataProviderStu3 extends TerminologyAwareRetrieveProvider {
         }
 
         return returnList;
-    }
-
-    public String convertPathFromCodeParam(String dataType, String codeOrDatePath) {
-        switch (dataType) {
-            case "AllergyIntolerance":
-                if (codeOrDatePath.contains("code")) return "substance";
-                break;
-            case "MedicationRequest":
-                if (codeOrDatePath.equals("code")) return "medicationCodeableConcept";
-                break;
-            case "Observation":
-                // this is a tricky one! todo - need to also check component.code
-                if (codeOrDatePath.equals("combo-code")) return "code";
-                else if (codeOrDatePath.equals("component-code")) return "component.code";
-        }
-        return codeOrDatePath;
     }
 }
