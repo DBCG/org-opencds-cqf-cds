@@ -16,6 +16,7 @@ import org.opencds.cqf.cql.model.Dstu3FhirModelResolver;
 import org.opencds.cqf.cql.model.ModelResolver;
 import org.opencds.cqf.cql.model.R4FhirModelResolver;
 import org.opencds.cqf.cql.retrieve.RestFhirRetrieveProvider;
+import org.opencds.cqf.cql.searchparam.SearchParameterResolver;
 import org.opencds.cqf.cql.terminology.TerminologyProvider;
 import org.opencds.cqf.cql.terminology.fhir.Dstu3FhirTerminologyProvider;
 import org.opencds.cqf.cql.terminology.fhir.R4FhirTerminologyProvider;
@@ -127,7 +128,7 @@ public abstract class EvaluationContext<T extends IBaseResource> {
                     throw new NotImplementedException("This CDS Hooks implementation is not configured for FHIR version: " + fhirVersion.getFhirVersionString());
             }
 
-            RestFhirRetrieveProvider provider = new RestFhirRetrieveProvider(registry, this.getHookFhirClient());
+            RestFhirRetrieveProvider provider = new RestFhirRetrieveProvider(new SearchParameterResolver(registry), this.getHookFhirClient());
             provider.setTerminologyProvider(terminologyProvider);
 
             this.remoteProvider = new CompositeDataProvider(resolver, provider);
