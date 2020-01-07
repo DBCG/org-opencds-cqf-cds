@@ -128,7 +128,7 @@ public abstract class EvaluationContext<T extends IBaseResource> {
                     throw new NotImplementedException("This CDS Hooks implementation is not configured for FHIR version: " + fhirVersion.getFhirVersionString());
             }
 
-            RestFhirRetrieveProvider provider = new RestFhirRetrieveProvider(new SearchParameterResolver(registry), this.getHookFhirClient());
+            RestFhirRetrieveProvider provider = new RestFhirRetrieveProvider(new SearchParameterResolver(this.fhirContext), this.getHookFhirClient());
             provider.setTerminologyProvider(terminologyProvider);
 
             this.remoteProvider = new CompositeDataProvider(resolver, provider);
