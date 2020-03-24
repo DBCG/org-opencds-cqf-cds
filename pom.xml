@@ -20,7 +20,27 @@
         <cql_engine_version>1.3.12</cql_engine_version>
     </properties>
 
-    <name>CDS Hooks</name>
+    <name>cds-hooks</name>
+    <description>cds-hooks module for the cqf-ruler</description>
+    <url>https://github.com/DBCG/org-opencds-cqf-cds/tree/master</url>
+
+    <developers>
+        <developer>
+            <name>Chris Schuler</name>
+        </developer>
+    </developers>
+
+    <licenses>
+        <license>
+            <name>Apache License, Version 2.0</name>
+            <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+            <distribution>repo</distribution>
+        </license>
+    </licenses>
+
+    <scm>
+        <developerConnection>scm:git:https://github.com/DBCG/org-opencds-cqf-cds/</developerConnection>
+    </scm>
 
     <repositories>
         <repository>
