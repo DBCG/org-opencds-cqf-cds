@@ -39,7 +39,9 @@
     </licenses>
 
     <scm>
+        <connection>scm:git:git://github.com/DBCG/org-opencds-cqf-cds.git</connection>
         <developerConnection>scm:git:https://github.com/DBCG/org-opencds-cqf-cds/</developerConnection>
+        <url>http://github.com/DBCG/org-opencds-cqf-cds.git/tree/master</url>
     </scm>
 
     <repositories>
