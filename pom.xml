@@ -17,9 +17,7 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 
-        <hapi_version>3.7.0</hapi_version>
-        <cql_engine_version>1.3.12-SNAPSHOT</cql_engine_version>
-        <cqframework_version>1.3.19-SNAPSHOT</cqframework_version>
+        <cql_engine_version>1.3.12</cql_engine_version>
     </properties>
 
     <name>CDS Hooks</name>
@@ -61,18 +59,6 @@
                     <artifactId>slf4j-log4j12</artifactId>
                 </exclusion>
             </exclusions>
-        </dependency>
-
-        <dependency>
-            <groupId>info.cqframework</groupId>
-            <artifactId>cql-to-elm</artifactId>
-            <version>${cqframework_version}</version>
-        </dependency>
-
-        <dependency>
-            <groupId>info.cqframework</groupId>
-            <artifactId>cql-formatter</artifactId>
-            <version>${cqframework_version}</version>
         </dependency>
     </dependencies>
 
