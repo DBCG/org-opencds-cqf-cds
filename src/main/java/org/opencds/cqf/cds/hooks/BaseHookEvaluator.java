@@ -12,12 +12,15 @@ import org.cqframework.cql.elm.execution.ListTypeSpecifier;
 import org.cqframework.cql.elm.execution.ParameterDef;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.opencds.cqf.cql.data.CompositeDataProvider;
+import org.opencds.cqf.cql.data.DataProvider;
 import org.opencds.cqf.cql.execution.Context;
 import org.opencds.cqf.cql.model.Dstu2FhirModelResolver;
 import org.opencds.cqf.cql.model.Dstu3FhirModelResolver;
 import org.opencds.cqf.cql.model.ModelResolver;
 import org.opencds.cqf.cql.model.R4FhirModelResolver;
+import org.opencds.cqf.cql.retrieve.RestFhirRetrieveProvider;
 import org.opencds.cqf.cql.retrieve.TerminologyAwareRetrieveProvider;
+import org.opencds.cqf.cql.searchparam.SearchParameterResolver;
 
 import java.io.IOException;
 import java.util.List;
@@ -36,26 +39,34 @@ public abstract class BaseHookEvaluator<P extends IBaseResource> {
             }
         }
 
-        // resolve PrefetchDataProvider
-        TerminologyAwareRetrieveProvider prefetchDataProvider;
+        // Remote data retriever
+        TerminologyAwareRetrieveProvider remoteRetriever = new RestFhirRetrieveProvider(
+                new SearchParameterResolver(context.getFhirContext()), context.getHookFhirClient());
+
+        remoteRetriever.setTerminologyProvider(context.getContext().resolveTerminologyProvider());
+
+
+        TerminologyAwareRetrieveProvider prefetchRetriever;
         ModelResolver resolver;
         if (context.getFhirVersion() == FhirVersionEnum.DSTU3) {
-            prefetchDataProvider = new PrefetchDataProviderStu3(context.getPrefetchResources());
+            prefetchRetriever = new PrefetchDataProviderStu3(context.getPrefetchResources(), remoteRetriever);
             resolver = new Dstu3FhirModelResolver();
+
         }
         else if (context.getFhirVersion() == FhirVersionEnum.DSTU2) {
-            prefetchDataProvider = new PrefetchDataProviderDstu2(context.getPrefetchResources());
+            prefetchRetriever = new PrefetchDataProviderDstu2(context.getPrefetchResources(), remoteRetriever);
             resolver = new Dstu2FhirModelResolver();
         }
+
         else {
-            prefetchDataProvider = new PrefetchDataProviderR4(context.getPrefetchResources());
+            prefetchRetriever = new PrefetchDataProviderR4(context.getPrefetchResources(), remoteRetriever);
             resolver = new R4FhirModelResolver();
         }
 
         // TODO: Get the "system" terminology provider.
-        prefetchDataProvider.setTerminologyProvider(context.getContext().resolveTerminologyProvider());
-        context.getContext().registerDataProvider("http://hl7.org/fhir", new CompositeDataProvider(resolver, prefetchDataProvider));
-        context.getContext().registerTerminologyProvider(prefetchDataProvider.getTerminologyProvider());
+        prefetchRetriever.setTerminologyProvider(context.getContext().resolveTerminologyProvider());
+        context.getContext().registerDataProvider("http://hl7.org/fhir", new CompositeDataProvider(resolver, prefetchRetriever));
+        context.getContext().registerTerminologyProvider(prefetchRetriever.getTerminologyProvider());
 
         return evaluateCdsHooksPlanDefinition(
                 context.getContext(),

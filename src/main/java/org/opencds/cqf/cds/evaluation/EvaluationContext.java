@@ -105,22 +105,18 @@ public abstract class EvaluationContext<T extends IBaseResource> {
             ModelResolver resolver;
 
             // TODO: Need to factor out all the SearchParamRegistry stuff.
-            ISearchParamRegistry registry;
             TerminologyProvider terminologyProvider;
             switch (fhirVersion) {
                 case DSTU2:
                     resolver = new Dstu2FhirModelResolver();
-                    registry = new SearchParamRegistryDstu2();
                     terminologyProvider = new Dstu3FhirTerminologyProvider(this.getSystemFhirClient());
                     break;
                 case DSTU3:
                     resolver = new Dstu3FhirModelResolver();
-                    registry = new SearchParamRegistryDstu3();
                     terminologyProvider = new Dstu3FhirTerminologyProvider(this.getSystemFhirClient());
                     break;
                 case R4:
                     resolver = new R4FhirModelResolver();
-                    registry = new SearchParamRegistryR4();
                     terminologyProvider = new R4FhirTerminologyProvider(this.getSystemFhirClient());
                     break;
                 default:
@@ -171,7 +167,7 @@ public abstract class EvaluationContext<T extends IBaseResource> {
         return this.client;
     }
 
-    protected IGenericClient getHookFhirClient() {
+    public IGenericClient getHookFhirClient() {
         IGenericClient client = this.fhirContext.newRestfulGenericClient(this.hook.getRequest().getFhirServerUrl());
         if (this.hook.getRequest().getFhirAuthorization() != null
                     && hook.getRequest().getFhirAuthorization().getTokenType().equals("Bearer")) {
