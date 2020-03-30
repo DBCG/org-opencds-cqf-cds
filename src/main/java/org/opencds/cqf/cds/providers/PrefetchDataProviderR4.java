@@ -1,6 +1,9 @@
 package org.opencds.cqf.cds.providers;
 
+import org.opencds.cqf.cql.retrieve.RetrieveProvider;
 import org.opencds.cqf.cql.retrieve.TerminologyAwareRetrieveProvider;
+import org.opencds.cqf.cds.discovery.DiscoveryResolution;
+import org.opencds.cqf.cql.data.DataProvider;
 import org.opencds.cqf.cql.elm.execution.InEvaluator;
 import org.opencds.cqf.cql.elm.execution.IncludesEvaluator;
 import org.opencds.cqf.cql.model.ModelResolver;
@@ -16,9 +19,11 @@ public class PrefetchDataProviderR4 extends TerminologyAwareRetrieveProvider {
 
     private Map<String, List<Object>> prefetchResources;
     private ModelResolver resolver;
+    private RetrieveProvider remoteProvider;
 
-    public PrefetchDataProviderR4(List<Object> resources) {
+    public PrefetchDataProviderR4(List<Object> resources, RetrieveProvider remoteProvider) {
         prefetchResources = PrefetchDataProviderHelper.populateMap(resources);
+        this.remoteProvider = remoteProvider;
         this.resolver = new R4FhirModelResolver();
     }
 
@@ -33,6 +38,12 @@ public class PrefetchDataProviderR4 extends TerminologyAwareRetrieveProvider {
 
         if (dataType == null) {
             throw new IllegalArgumentException("A data type (i.e. Procedure, Valueset, etc...) must be specified for clinical data retrieval");
+        }
+
+        // This dataType can't be related to patient, therefore may
+        // not be in the pre-fetch bundle, or might required a lookup by Id
+        if (context.equals("Patient") && contextPath == null) {
+            return remoteProvider.retrieve(context, contextPath, contextValue, dataType, templateId, codePath, codes, valueSet, datePath, dateLowPath, dateHighPath, dateRange);
         }
 
         List<Object> resourcesOfType = prefetchResources.get(dataType);
