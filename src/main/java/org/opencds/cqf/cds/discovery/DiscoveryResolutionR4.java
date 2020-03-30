@@ -149,9 +149,6 @@ public class DiscoveryResolutionR4 {
             case "MedicationStatement":
                 if (path.equals("medication")) return "code";
                 break;
-            case "ProcedureRequest":
-                if (path.equals("bodySite")) return "body-site";
-                break;
             default:
                 if (path.equals("vaccineCode")) return "vaccine-code";
                 break;
@@ -168,7 +165,7 @@ public class DiscoveryResolutionR4 {
             case "AppointmentResponse":
             case "AuditEvent":
             case "Basic":
-            case "BodySite":
+            case "BodyStructure":
             case "CarePlan":
             case "CareTeam":
             case "ChargeItem":
@@ -181,12 +178,14 @@ public class DiscoveryResolutionR4 {
             case "Condition":
             case "Consent":
             case "Coverage":
+            case "CoverageEligibilityRequest":
+            case "CoverageEligibilityResponse":
             case "DetectedIssue":
             case "DeviceRequest":
             case "DeviceUseStatement":
             case "DiagnosticReport":
             case "DocumentManifest":
-            case "EligibilityRequest":
+            case "DocumentReference":
             case "Encounter":
             case "EnrollmentRequest":
             case "EpisodeOfCare":
@@ -195,10 +194,11 @@ public class DiscoveryResolutionR4 {
             case "Flag":
             case "Goal":
             case "Group":
-            case "ImagingManifest":
             case "ImagingStudy":
             case "Immunization":
+            case "ImmunizationEvaluation":
             case "ImmunizationRecommendation":
+            case "Invoice":
             case "List":
             case "MeasureReport":
             case "Media":
@@ -206,20 +206,20 @@ public class DiscoveryResolutionR4 {
             case "MedicationDispense":
             case "MedicationRequest":
             case "MedicationStatement":
+            case "MolecularSequence":
             case "NutritionOrder":
             case "Observation":
             case "Patient":
             case "Person":
             case "Procedure":
-            case "ProcedureRequest":
             case "Provenance":
             case "QuestionnaireResponse":
-            case "ReferralRequest":
             case "RelatedPerson":
             case "RequestGroup":
             case "ResearchSubject":
             case "RiskAssessment":
             case "Schedule":
+            case "ServiceRequest":
             case "Specimen":
             case "SupplyDelivery":
             case "SupplyRequest":
@@ -244,7 +244,7 @@ public class DiscoveryResolutionR4 {
                 return "patient";
             case "Basic":
                 return "patient";
-            case "BodySite":
+            case "BodyStructure":
                 return "patient";
             case "CarePlan":
                 return "patient";
@@ -269,7 +269,7 @@ public class DiscoveryResolutionR4 {
             case "Consent":
                 return "patient";
             case "Coverage":
-                return "patient";
+                return "policy-holder";
             case "DetectedIssue":
                 return "patient";
             case "DeviceRequest":
@@ -282,8 +282,6 @@ public class DiscoveryResolutionR4 {
                 return "subject";
             case "DocumentReference":
                 return "subject";
-            case "EligibilityRequest":
-                return "patient";
             case "Encounter":
                 return "patient";
             case "EnrollmentRequest":
@@ -300,14 +298,14 @@ public class DiscoveryResolutionR4 {
                 return "patient";
             case "Group":
                 return "member";
-            case "ImagingManifest":
-                return "patient";
             case "ImagingStudy":
                 return "patient";
             case "Immunization":
                 return "patient";
             case "ImmunizationRecommendation":
                 return "patient";
+            case "Invoice":
+                return "subject";
             case "List":
                 return "subject";
             case "MeasureReport":
@@ -322,6 +320,8 @@ public class DiscoveryResolutionR4 {
                 return "subject";
             case "MedicationStatement":
                 return "subject";
+            case "MolecularSequence":
+                return "patient";
             case "NutritionOrder":
                 return "patient";
             case "Observation":
@@ -332,14 +332,10 @@ public class DiscoveryResolutionR4 {
                 return "patient";
             case "Procedure":
                 return "patient";
-            case "ProcedureRequest":
-                return "patient";
             case "Provenance":
                 return "patient";
             case "QuestionnaireResponse":
                 return "subject";
-            case "ReferralRequest":
-                return "patient";
             case "RelatedPerson":
                 return "patient";
             case "RequestGroup":
