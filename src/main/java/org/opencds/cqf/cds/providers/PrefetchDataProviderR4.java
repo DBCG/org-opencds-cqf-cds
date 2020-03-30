@@ -2,8 +2,6 @@ package org.opencds.cqf.cds.providers;
 
 import org.opencds.cqf.cql.retrieve.RetrieveProvider;
 import org.opencds.cqf.cql.retrieve.TerminologyAwareRetrieveProvider;
-import org.opencds.cqf.cds.discovery.DiscoveryResolution;
-import org.opencds.cqf.cql.data.DataProvider;
 import org.opencds.cqf.cql.elm.execution.InEvaluator;
 import org.opencds.cqf.cql.elm.execution.IncludesEvaluator;
 import org.opencds.cqf.cql.model.ModelResolver;

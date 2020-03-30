@@ -6,14 +6,14 @@ import org.hl7.fhir.dstu3.model.*;
 import java.util.ArrayList;
 import java.util.List;
 
-public class DiscoveryResolution {
+public class DiscoveryResolutionStu3 {
 
     private final String PATIENT_ID_CONTEXT = "{{context.patientId}}";
     private final int URI_MAX_LENGTH = 8000;
 
     private IGenericClient client;
 
-    public DiscoveryResolution(IGenericClient client) {
+    public DiscoveryResolutionStu3(IGenericClient client) {
         this.client = client;
     }
 
@@ -127,7 +127,7 @@ public class DiscoveryResolution {
             for (Bundle.BundleEntryComponent component : bundle.getEntry()) {
                 PlanDefinition planDefinition = resolvePlanDefinition(component);
                 response.addElement(
-                        new DiscoveryElement(planDefinition, getPrefetchUrlList(planDefinition))
+                        new DiscoveryElementStu3(planDefinition, getPrefetchUrlList(planDefinition))
                 );
             }
         }
