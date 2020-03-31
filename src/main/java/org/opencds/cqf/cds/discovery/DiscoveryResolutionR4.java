@@ -2,6 +2,7 @@ package org.opencds.cqf.cds.discovery;
 
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import org.hl7.fhir.r4.model.*;
+import org.opencds.cqf.cds.helpers.CanonicalHelper;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -38,10 +39,10 @@ public class DiscoveryResolutionR4 {
     public Library resolvePrimaryLibrary(PlanDefinition planDefinition) {
         // Assuming 1 library
         // TODO: enhance to handle multiple libraries - need a way to identify primary library
-        if (!planDefinition.hasLibrary() && planDefinition.getLibrary().isEmpty()) {
+        if (planDefinition.hasLibrary() && !planDefinition.getLibrary().isEmpty()) {
             return (Library) client.read()
                     .resource("Library")
-                    .withId(new IdType(planDefinition.getLibrary().get(0).getId()))
+                    .withId(new IdType(CanonicalHelper.getId(planDefinition.getLibrary().get(0))))
                     .execute();
         }
         return null;
@@ -346,6 +347,8 @@ public class DiscoveryResolutionR4 {
                 return "subject";
             case "Schedule":
                 return "actor";
+            case "ServiceRequest":
+                return "patient";
             case "Specimen":
                 return "subject";
             case "SupplyDelivery":
