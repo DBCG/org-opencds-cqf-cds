@@ -8,9 +8,9 @@ import ca.uhn.fhir.model.primitive.DateDt;
 import ca.uhn.fhir.model.primitive.DateTimeDt;
 import ca.uhn.fhir.model.primitive.InstantDt;
 import org.hl7.fhir.dstu3.model.*;
-import org.opencds.cqf.cql.runtime.Code;
-import org.opencds.cqf.cql.runtime.DateTime;
-import org.opencds.cqf.cql.runtime.Interval;
+import org.opencds.cqf.cql.engine.runtime.Code;
+import org.opencds.cqf.cql.engine.runtime.DateTime;
+import org.opencds.cqf.cql.engine.runtime.Interval;
 
 import java.util.*;
 
@@ -22,31 +22,29 @@ public class PrefetchDataProviderHelper {
             if (resource instanceof Resource) {
                 if (prefetchResources.containsKey(((Resource) resource).fhirType())) {
                     prefetchResources.get(((Resource) resource).fhirType()).add(resource);
-                }
-                else {
+                } else {
                     List<Object> resourceList = new ArrayList<>();
                     resourceList.add(resource);
                     prefetchResources.put(((Resource) resource).fhirType(), resourceList);
                 }
-            }
-            else if (resource instanceof org.hl7.fhir.r4.model.Resource) {
+            } else if (resource instanceof org.hl7.fhir.r4.model.Resource) {
                 if (prefetchResources.containsKey(((org.hl7.fhir.r4.model.Resource) resource).fhirType())) {
                     prefetchResources.get(((org.hl7.fhir.r4.model.Resource) resource).fhirType()).add(resource);
-                }
-                else {
+                } else {
                     List<Object> resourceList = new ArrayList<>();
                     resourceList.add(resource);
                     prefetchResources.put(((org.hl7.fhir.r4.model.Resource) resource).fhirType(), resourceList);
                 }
-            }
-            else if (resource instanceof ca.uhn.fhir.model.dstu2.resource.BaseResource) {
-                if (prefetchResources.containsKey(((ca.uhn.fhir.model.dstu2.resource.BaseResource) resource).getResourceName())) {
-                    prefetchResources.get(((ca.uhn.fhir.model.dstu2.resource.BaseResource) resource).getResourceName()).add(resource);
-                }
-                else {
+            } else if (resource instanceof ca.uhn.fhir.model.dstu2.resource.BaseResource) {
+                if (prefetchResources
+                        .containsKey(((ca.uhn.fhir.model.dstu2.resource.BaseResource) resource).getResourceName())) {
+                    prefetchResources.get(((ca.uhn.fhir.model.dstu2.resource.BaseResource) resource).getResourceName())
+                            .add(resource);
+                } else {
                     List<Object> resourceList = new ArrayList<>();
                     resourceList.add(resource);
-                    prefetchResources.put(((ca.uhn.fhir.model.dstu2.resource.BaseResource) resource).getResourceName(), resourceList);
+                    prefetchResources.put(((ca.uhn.fhir.model.dstu2.resource.BaseResource) resource).getResourceName(),
+                            resourceList);
                 }
             }
         }
@@ -77,13 +75,20 @@ public class PrefetchDataProviderHelper {
         }
 
         switch (precision) {
-            case 1: return "year";
-            case 2: return "month";
-            case 3: return "day";
-            case 4: return "hour";
-            case 5: return "minute";
-            case 6: return "second";
-            default: return "millisecond";
+            case 1:
+                return "year";
+            case 2:
+                return "month";
+            case 3:
+                return "day";
+            case 4:
+                return "hour";
+            case 5:
+                return "minute";
+            case 6:
+                return "second";
+            default:
+                return "millisecond";
         }
     }
 
@@ -95,10 +100,8 @@ public class PrefetchDataProviderHelper {
         } else if (dateObject instanceof InstantDt) {
             return DateTime.fromJavaDate(((InstantDt) dateObject).getValue());
         } else if (dateObject instanceof PeriodDt) {
-            return new Interval(
-                    DateTime.fromJavaDate(((PeriodDt) dateObject).getStart()), true,
-                    DateTime.fromJavaDate(((PeriodDt) dateObject).getEnd()), true
-            );
+            return new Interval(DateTime.fromJavaDate(((PeriodDt) dateObject).getStart()), true,
+                    DateTime.fromJavaDate(((PeriodDt) dateObject).getEnd()), true);
         }
         return dateObject;
     }
@@ -107,9 +110,9 @@ public class PrefetchDataProviderHelper {
         if (codeObject instanceof CodeDt) {
             return ((CodeDt) codeObject).getValue();
         } else if (codeObject instanceof CodingDt) {
-            return new Code().withSystem(((CodingDt) codeObject).getSystem()).withCode(((CodingDt) codeObject).getCode());
-        }
-        else if (codeObject instanceof CodeableConceptDt) {
+            return new Code().withSystem(((CodingDt) codeObject).getSystem())
+                    .withCode(((CodingDt) codeObject).getCode());
+        } else if (codeObject instanceof CodeableConceptDt) {
             List<Code> codes = new ArrayList<>();
             for (CodingDt coding : ((CodeableConceptDt) codeObject).getCoding()) {
                 codes.add((Code) getDstu2Code(coding));
@@ -127,10 +130,8 @@ public class PrefetchDataProviderHelper {
         } else if (dateObject instanceof InstantType) {
             return DateTime.fromJavaDate(((InstantType) dateObject).getValue());
         } else if (dateObject instanceof Period) {
-            return new Interval(
-                    DateTime.fromJavaDate(((Period) dateObject).getStart()), true,
-                    DateTime.fromJavaDate(((Period) dateObject).getEnd()), true
-            );
+            return new Interval(DateTime.fromJavaDate(((Period) dateObject).getStart()), true,
+                    DateTime.fromJavaDate(((Period) dateObject).getEnd()), true);
         }
         return dateObject;
     }
@@ -143,10 +144,8 @@ public class PrefetchDataProviderHelper {
         } else if (dateObject instanceof org.hl7.fhir.r4.model.InstantType) {
             return DateTime.fromJavaDate(((org.hl7.fhir.r4.model.InstantType) dateObject).getValue());
         } else if (dateObject instanceof org.hl7.fhir.r4.model.Period) {
-            return new Interval(
-                    DateTime.fromJavaDate(((org.hl7.fhir.r4.model.Period) dateObject).getStart()), true,
-                    DateTime.fromJavaDate(((org.hl7.fhir.r4.model.Period) dateObject).getEnd()), true
-            );
+            return new Interval(DateTime.fromJavaDate(((org.hl7.fhir.r4.model.Period) dateObject).getStart()), true,
+                    DateTime.fromJavaDate(((org.hl7.fhir.r4.model.Period) dateObject).getEnd()), true);
         }
         return dateObject;
     }
@@ -156,8 +155,7 @@ public class PrefetchDataProviderHelper {
             return ((CodeType) codeObject).getValue();
         } else if (codeObject instanceof Coding) {
             return new Code().withSystem(((Coding) codeObject).getSystem()).withCode(((Coding) codeObject).getCode());
-        }
-        else if (codeObject instanceof CodeableConcept) {
+        } else if (codeObject instanceof CodeableConcept) {
             List<Code> codes = new ArrayList<>();
             for (Coding coding : ((CodeableConcept) codeObject).getCoding()) {
                 codes.add((Code) getStu3Code(coding));
@@ -171,11 +169,12 @@ public class PrefetchDataProviderHelper {
         if (codeObject instanceof org.hl7.fhir.r4.model.CodeType) {
             return ((org.hl7.fhir.r4.model.CodeType) codeObject).getValue();
         } else if (codeObject instanceof org.hl7.fhir.r4.model.Coding) {
-            return new Code().withSystem(((org.hl7.fhir.r4.model.Coding) codeObject).getSystem()).withCode(((org.hl7.fhir.r4.model.Coding) codeObject).getCode());
-        }
-        else if (codeObject instanceof org.hl7.fhir.r4.model.CodeableConcept) {
+            return new Code().withSystem(((org.hl7.fhir.r4.model.Coding) codeObject).getSystem())
+                    .withCode(((org.hl7.fhir.r4.model.Coding) codeObject).getCode());
+        } else if (codeObject instanceof org.hl7.fhir.r4.model.CodeableConcept) {
             List<Code> codes = new ArrayList<>();
-            for (org.hl7.fhir.r4.model.Coding coding : ((org.hl7.fhir.r4.model.CodeableConcept) codeObject).getCoding()) {
+            for (org.hl7.fhir.r4.model.Coding coding : ((org.hl7.fhir.r4.model.CodeableConcept) codeObject)
+                    .getCoding()) {
                 codes.add((Code) getR4Code(coding));
             }
             return codes;
@@ -184,15 +183,14 @@ public class PrefetchDataProviderHelper {
     }
 
     public static boolean checkCodeMembership(Iterable<Code> codes, Object codeObject) {
-        // for now, just checking whether code values are equal... TODO - add intelligent checks for system and version
+        // for now, just checking whether code values are equal... TODO - add
+        // intelligent checks for system and version
         for (Code code : codes) {
             if (codeObject instanceof String && code.getCode().equals(codeObject)) {
                 return true;
-            }
-            else if (codeObject instanceof Code && code.getCode().equals(((Code) codeObject).getCode())) {
+            } else if (codeObject instanceof Code && code.getCode().equals(((Code) codeObject).getCode())) {
                 return true;
-            }
-            else if (codeObject instanceof Iterable) {
+            } else if (codeObject instanceof Iterable) {
                 for (Object obj : (Iterable) codeObject) {
                     if (code.getCode().equals(((Code) obj).getCode())) {
                         return true;
