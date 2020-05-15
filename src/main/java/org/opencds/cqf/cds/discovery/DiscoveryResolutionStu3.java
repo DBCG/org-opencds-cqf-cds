@@ -38,11 +38,19 @@ public class DiscoveryResolutionStu3 {
     public Library resolvePrimaryLibrary(PlanDefinition planDefinition) {
         // Assuming 1 library
         // TODO: enhance to handle multiple libraries - need a way to identify primary library
+        Library library = null;
         if (planDefinition.hasLibrary() && planDefinition.getLibraryFirstRep().hasReference()) {
+            library = resolveLibrary(planDefinition.getLibraryFirstRep().getReference());
+        }
+        return library;
+    }
+
+    public Library resolveLibrary(String libraryId) {
+        if (libraryId != null && !libraryId.isBlank() && !libraryId.isEmpty()) {
             return (Library) client.read()
-                    .resource("Library")
-                    .withId(new IdType(planDefinition.getLibraryFirstRep().getReference()))
-                    .execute();
+                .resource("Library")
+                .withId(new IdType(libraryId))
+                .execute();
         }
         return null;
     }
@@ -53,33 +61,51 @@ public class DiscoveryResolutionStu3 {
             // TODO: report missing terminology
             return null;
         }
-        List<String> ret = new ArrayList<>();
+        List<String> result = new ArrayList<>();
+
         StringBuilder codes = new StringBuilder();
         if (bundle.hasEntry() && bundle.getEntry().size() == 1) {
             if (bundle.getEntry().get(0).hasResource() && bundle.getEntry().get(0).getResource() instanceof ValueSet) {
                 ValueSet valueSet = (ValueSet) bundle.getEntry().get(0).getResource();
-                if (valueSet.hasCompose() && valueSet.getCompose().hasInclude()) {
+                if (valueSet.hasExpansion() && valueSet.getExpansion().hasContains()) {
+                    for (ValueSet.ValueSetExpansionContainsComponent contains : valueSet.getExpansion().getContains()) {
+                        String system = contains.getSystem();
+                        String code = contains.getCode();
+
+                        codes = getCodesStringBuilder(result, codes, system, code);
+                    }
+                }
+                else if (valueSet.hasCompose() && valueSet.getCompose().hasInclude()) {
                     for (ValueSet.ConceptSetComponent concepts : valueSet.getCompose().getInclude()) {
                         String system = concepts.getSystem();
                         if (concepts.hasConcept()) {
                             for (ValueSet.ConceptReferenceComponent concept : concepts.getConcept()) {
-                                String codeToken = system + "|" + concept.getCode();
-                                if (codes.length() > 0) {
-                                    codes.append(",");
-                                }
-                                else if ((codes.length() + codeToken.length()) > URI_MAX_LENGTH) {
-                                    ret.add(codes.toString());
-                                    codes = new StringBuilder();
-                                }
-                                codes.append(codeToken);
+                                String code = concept.getCode();
+
+                                codes = getCodesStringBuilder(result, codes, system, code);
                             }
                         }
                     }
                 }
             }
         }
-        ret.add(codes.toString());
-        return ret;
+        result.add(codes.toString());
+        return result;
+    }
+
+    private StringBuilder getCodesStringBuilder(List<String> ret, StringBuilder codes, String system, String code) {
+        String codeToken = system + "|" + code;
+        int postAppendLength = codes.length() + codeToken.length();
+
+        if (codes.length() > 0 && postAppendLength < URI_MAX_LENGTH) {
+            codes.append(",");
+        }
+        else if (postAppendLength > URI_MAX_LENGTH) {
+            ret.add(codes.toString());
+            codes = new StringBuilder();
+        }
+        codes.append(codeToken);
+        return codes;
     }
 
     public List<String> createRequestUrl(DataRequirement dataRequirement) {
@@ -90,8 +116,17 @@ public class DiscoveryResolutionStu3 {
             for (DataRequirement.DataRequirementCodeFilterComponent codeFilterComponent : dataRequirement.getCodeFilter()) {
                 if (!codeFilterComponent.hasPath()) continue;
                 String path = mapCodePathToSearchParam(dataRequirement.getType(), codeFilterComponent.getPath());
+
+                String codeFilterComponentString = null;
                 if (codeFilterComponent.hasValueSetStringType()) {
-                    for (String codes : resolveValueSetCodes(codeFilterComponent.getValueSetStringType().getValueNotNull())) {
+                    codeFilterComponentString = codeFilterComponent.getValueSetStringType().getValueNotNull();
+                }
+                else if (codeFilterComponent.hasValueSetReference()) {
+                    codeFilterComponentString = codeFilterComponent.getValueSetReference().getReference();
+                }
+
+                if (codeFilterComponentString != null) {
+                    for (String codes : resolveValueSetCodes(codeFilterComponentString)) {
                         ret.add(patientRelatedResource + "&" + path + "=" + codes);
                     }
                 }
@@ -117,6 +152,7 @@ public class DiscoveryResolutionStu3 {
                 prefetchList.addAll(requestUrls);
             }
         }
+
         return prefetchList;
     }
 
