@@ -25,6 +25,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.client.interceptor.BearerTokenAuthInterceptor;
+import ca.uhn.fhir.rest.client.interceptor.LoggingInterceptor;
 
 public abstract class EvaluationContext<T extends IBaseResource> {
 
@@ -170,6 +171,16 @@ public abstract class EvaluationContext<T extends IBaseResource> {
             // TODO: account for the expires_in, scope and subject properties within
             // workflow
         }
+
+        var loggingInterceptor = new LoggingInterceptor();
+        loggingInterceptor.setLogRequestSummary(true);
+        loggingInterceptor.setLogRequestHeaders(true);
+        loggingInterceptor.setLogRequestBody(true);
+        
+        loggingInterceptor.setLogResponseSummary(true);
+
+
+        client.registerInterceptor(loggingInterceptor);
 
         return client;
     }
