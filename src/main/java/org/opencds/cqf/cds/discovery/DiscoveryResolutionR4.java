@@ -56,6 +56,23 @@ public class DiscoveryResolutionR4 {
         return null;
     }
 
+    public List<String> resolveValueCodingCodes(List<Coding> valueCodings) {
+        List<String> result = new ArrayList<>();
+
+        StringBuilder codes = new StringBuilder();
+        for (Coding coding : valueCodings) {
+            if (coding.hasCode()) {
+                String system = coding.getSystem();
+                String code = coding.getCode();
+
+                codes = getCodesStringBuilder(result, codes, system, code);
+            }
+        }
+
+        result.add(codes.toString());
+        return result;
+    }
+
     public List<String> resolveValueSetCodes(String valueSetId) {
         Bundle bundle = (Bundle) client.search().forResource("ValueSet").where(ValueSet.URL.matches().value(valueSetId)).execute();
         if (bundle == null) {
@@ -120,6 +137,19 @@ public class DiscoveryResolutionR4 {
                 if (codeFilterComponent.hasValueSetElement()) {
                     for (String codes : resolveValueSetCodes(codeFilterComponent.getValueSet())) {
                         ret.add(patientRelatedResource + "&" + path + "=" + codes);
+                    }
+                }
+                else if (codeFilterComponent.hasCode()) {
+                    List<Coding> codeFilterValueCodings = codeFilterComponent.getCode();
+                    boolean isFirstCodingInFilter = true;
+                    for (String code : resolveValueCodingCodes(codeFilterValueCodings)) {
+                        if (isFirstCodingInFilter) {
+                            ret.add(patientRelatedResource + "&" + path + "=" + code);
+                        } else {
+                            ret.add("," + code);
+                        }
+
+                        isFirstCodingInFilter = false;
                     }
                 }
             }

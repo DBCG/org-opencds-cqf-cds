@@ -55,6 +55,23 @@ public class DiscoveryResolutionStu3 {
         return null;
     }
 
+    public List<String> resolveValueCodingCodes(List<Coding> valueCodings) {
+        List<String> result = new ArrayList<>();
+
+        StringBuilder codes = new StringBuilder();
+        for (Coding coding : valueCodings) {
+            if (coding.hasCode()) {
+                String system = coding.getSystem();
+                String code = coding.getCode();
+
+                codes = getCodesStringBuilder(result, codes, system, code);
+            }
+        }
+
+        result.add(codes.toString());
+        return result;
+    }
+
     public List<String> resolveValueSetCodes(String valueSetId) {
         Bundle bundle = (Bundle) client.search().forResource("ValueSet").where(ValueSet.URL.matches().value(valueSetId)).execute();
         if (bundle == null) {
@@ -123,6 +140,19 @@ public class DiscoveryResolutionStu3 {
                 }
                 else if (codeFilterComponent.hasValueSetReference()) {
                     codeFilterComponentString = codeFilterComponent.getValueSetReference().getReference();
+                }
+                else if (codeFilterComponent.hasValueCoding()) {
+                    List<Coding> codeFilterValueCodings = codeFilterComponent.getValueCoding();
+                    boolean isFirstCodingInFilter = true;
+                    for (String code : resolveValueCodingCodes(codeFilterValueCodings)) {
+                        if (isFirstCodingInFilter) {
+                            ret.add(patientRelatedResource + "&" + path + "=" + code);
+                        } else {
+                            ret.add("," + code);
+                        }
+
+                        isFirstCodingInFilter = false;
+                    }
                 }
 
                 if (codeFilterComponentString != null) {
