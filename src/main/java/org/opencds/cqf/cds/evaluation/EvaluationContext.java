@@ -178,7 +178,7 @@ public abstract class EvaluationContext<T extends IBaseResource> {
         loggingInterceptor.setLogRequestBody(true);
         
         loggingInterceptor.setLogResponseSummary(true);
-
+        loggingInterceptor.setLogResponseBody(true);
 
         client.registerInterceptor(loggingInterceptor);
 
