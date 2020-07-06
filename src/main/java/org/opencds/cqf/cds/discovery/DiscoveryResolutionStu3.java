@@ -46,7 +46,7 @@ public class DiscoveryResolutionStu3 {
     }
 
     public Library resolveLibrary(String libraryId) {
-        if (libraryId != null && !libraryId.isBlank() && !libraryId.isEmpty()) {
+        if (libraryId != null && !libraryId.trim().isEmpty()) {
             return (Library) client.read()
                 .resource("Library")
                 .withId(new IdType(libraryId))
