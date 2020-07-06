@@ -172,7 +172,7 @@ public abstract class EvaluationContext<T extends IBaseResource> {
             // workflow
         }
 
-        var loggingInterceptor = new LoggingInterceptor();
+        LoggingInterceptor loggingInterceptor = new LoggingInterceptor();
         loggingInterceptor.setLogRequestSummary(true);
         loggingInterceptor.setLogRequestHeaders(true);
         loggingInterceptor.setLogRequestBody(true);
