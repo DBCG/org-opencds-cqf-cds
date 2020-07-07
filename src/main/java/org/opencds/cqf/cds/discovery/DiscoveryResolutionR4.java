@@ -39,13 +39,38 @@ public class DiscoveryResolutionR4 {
     public Library resolvePrimaryLibrary(PlanDefinition planDefinition) {
         // Assuming 1 library
         // TODO: enhance to handle multiple libraries - need a way to identify primary library
+        Library library = null;
         if (planDefinition.hasLibrary() && !planDefinition.getLibrary().isEmpty()) {
+            library = resolveLibrary(planDefinition.getLibrary().get(0));
+        }
+        return library;
+    }
+
+    public Library resolveLibrary(CanonicalType libraryId) {
+        if (libraryId != null) {
             return (Library) client.read()
-                    .resource("Library")
-                    .withId(new IdType(CanonicalHelper.getId(planDefinition.getLibrary().get(0))))
-                    .execute();
+                .resource("Library")
+                .withId(new IdType(CanonicalHelper.getId(libraryId)))
+                .execute();
         }
         return null;
+    }
+
+    public List<String> resolveValueCodingCodes(List<Coding> valueCodings) {
+        List<String> result = new ArrayList<>();
+
+        StringBuilder codes = new StringBuilder();
+        for (Coding coding : valueCodings) {
+            if (coding.hasCode()) {
+                String system = coding.getSystem();
+                String code = coding.getCode();
+
+                codes = getCodesStringBuilder(result, codes, system, code);
+            }
+        }
+
+        result.add(codes.toString());
+        return result;
     }
 
     public List<String> resolveValueSetCodes(String valueSetId) {
@@ -54,33 +79,51 @@ public class DiscoveryResolutionR4 {
             // TODO: report missing terminology
             return null;
         }
-        List<String> ret = new ArrayList<>();
+        List<String> result = new ArrayList<>();
+
         StringBuilder codes = new StringBuilder();
         if (bundle.hasEntry() && bundle.getEntry().size() == 1) {
             if (bundle.getEntry().get(0).hasResource() && bundle.getEntry().get(0).getResource() instanceof ValueSet) {
                 ValueSet valueSet = (ValueSet) bundle.getEntry().get(0).getResource();
-                if (valueSet.hasCompose() && valueSet.getCompose().hasInclude()) {
+                if (valueSet.hasExpansion() && valueSet.getExpansion().hasContains()) {
+                    for (ValueSet.ValueSetExpansionContainsComponent contains : valueSet.getExpansion().getContains()) {
+                        String system = contains.getSystem();
+                        String code = contains.getCode();
+
+                        codes = getCodesStringBuilder(result, codes, system, code);
+                    }
+                }
+                else if (valueSet.hasCompose() && valueSet.getCompose().hasInclude()) {
                     for (ValueSet.ConceptSetComponent concepts : valueSet.getCompose().getInclude()) {
                         String system = concepts.getSystem();
                         if (concepts.hasConcept()) {
                             for (ValueSet.ConceptReferenceComponent concept : concepts.getConcept()) {
-                                String codeToken = system + "|" + concept.getCode();
-                                if (codes.length() > 0) {
-                                    codes.append(",");
-                                }
-                                else if ((codes.length() + codeToken.length()) > URI_MAX_LENGTH) {
-                                    ret.add(codes.toString());
-                                    codes = new StringBuilder();
-                                }
-                                codes.append(codeToken);
+                                String code = concept.getCode();
+
+                                codes = getCodesStringBuilder(result, codes, system, code);
                             }
                         }
                     }
                 }
             }
         }
-        ret.add(codes.toString());
-        return ret;
+        result.add(codes.toString());
+        return result;
+    }
+
+    private StringBuilder getCodesStringBuilder(List<String> ret, StringBuilder codes, String system, String code) {
+        String codeToken = system + "|" + code;
+        int postAppendLength = codes.length() + codeToken.length();
+
+        if (codes.length() > 0 && postAppendLength < URI_MAX_LENGTH) {
+            codes.append(",");
+        }
+        else if (postAppendLength > URI_MAX_LENGTH) {
+            ret.add(codes.toString());
+            codes = new StringBuilder();
+        }
+        codes.append(codeToken);
+        return codes;
     }
 
     public List<String> createRequestUrl(DataRequirement dataRequirement) {
@@ -92,8 +135,21 @@ public class DiscoveryResolutionR4 {
                 if (!codeFilterComponent.hasPath()) continue;
                 String path = mapCodePathToSearchParam(dataRequirement.getType(), codeFilterComponent.getPath());
                 if (codeFilterComponent.hasValueSetElement()) {
-                    for (String codes : resolveValueSetCodes(codeFilterComponent.getValueSetElement().getId())) {
+                    for (String codes : resolveValueSetCodes(codeFilterComponent.getValueSet())) {
                         ret.add(patientRelatedResource + "&" + path + "=" + codes);
+                    }
+                }
+                else if (codeFilterComponent.hasCode()) {
+                    List<Coding> codeFilterValueCodings = codeFilterComponent.getCode();
+                    boolean isFirstCodingInFilter = true;
+                    for (String code : resolveValueCodingCodes(codeFilterValueCodings)) {
+                        if (isFirstCodingInFilter) {
+                            ret.add(patientRelatedResource + "&" + path + "=" + code);
+                        } else {
+                            ret.add("," + code);
+                        }
+
+                        isFirstCodingInFilter = false;
                     }
                 }
             }

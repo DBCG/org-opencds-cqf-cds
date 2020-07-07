@@ -11,15 +11,17 @@ public class PrefetchUrlList extends CopyOnWriteArrayList<String> implements Ser
         for (String s : this) {
             if (s.equals(element)) return false;
             if (element.startsWith(s)) return false;
-            if (s.startsWith(element)) this.remove(s);
+            if (s.equals(element)) this.remove(s);
         }
         return super.add(element);
     }
 
     @Override
     public boolean addAll(Collection<? extends String> toAdd) {
-        for (String s : toAdd) {
-            add(s);
+        if (toAdd != null) {
+            for (String s : toAdd) {
+                add(s);
+            }
         }
         return true;
     }

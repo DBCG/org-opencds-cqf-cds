@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" 
+<project xmlns="http://maven.apache.org/POM/4.0.0"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
@@ -9,15 +9,15 @@
 
     <properties>
         <version.major>1</version.major>
-        <version.minor>0</version.minor>
-        <version.patch>3</version.patch>
+        <version.minor>1</version.minor>
+        <version.patch>0</version.patch>
         <!-- NOTE: Building under the release profile automatically drops the -SNAPSHOT extension -->
         <revision>${version.major}.${version.minor}.${version.patch}-SNAPSHOT</revision>
 
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 
-        <cql_engine_version>1.3.12.1</cql_engine_version>
+        <cql-engine.version>1.4.0</cql-engine.version>
     </properties>
 
     <name>cds-hooks</name>
@@ -60,9 +60,9 @@
 
     <dependencies>
         <dependency>
-            <groupId>org.opencds.cqf</groupId>
-            <artifactId>cql-engine</artifactId>
-            <version>${cql_engine_version}</version>
+            <groupId>org.opencds.cqf.cql</groupId>
+            <artifactId>engine</artifactId>
+            <version>${cql-engine.version}</version>
             <exclusions>
                 <exclusion>
                     <groupId>org.slf4j</groupId>
@@ -72,9 +72,9 @@
         </dependency>
 
         <dependency>
-            <groupId>org.opencds.cqf</groupId>
-            <artifactId>cql-engine-fhir</artifactId>
-            <version>${cql_engine_version}</version>
+            <groupId>org.opencds.cqf.cql</groupId>
+            <artifactId>engine.fhir</artifactId>
+            <version>${cql-engine.version}</version>
             <exclusions>
                 <exclusion>
                     <groupId>org.slf4j</groupId>
@@ -107,8 +107,9 @@
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-compiler-plugin</artifactId>
                     <configuration>
-                        <source>11</source>
-                        <target>11</target>
+                        <source>1.8</source>
+                        <target>1.8</target>
+                        <release>8</release>
                     </configuration>
                 </plugin>
                 <plugin>
@@ -121,7 +122,7 @@
                     <artifactId>maven-javadoc-plugin</artifactId>
                     <version>3.1.1</version>
                     <configuration>
-                        <source>11</source>
+                        <source>8</source>
                     </configuration>
                     <executions>
                         <execution>
@@ -226,7 +227,7 @@
                     <version>1.1.0</version>
                     <configuration>
                         <updatePomFile>true</updatePomFile>
-                        <flattenMode>resolveCiFriendliesOnly</flattenMode>
+                        <flattenMode>ossrh</flattenMode>
                     </configuration>
                     <executions>
                         <execution>

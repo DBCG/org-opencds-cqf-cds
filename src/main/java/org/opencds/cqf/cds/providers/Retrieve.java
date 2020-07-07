@@ -1,8 +1,8 @@
 package org.opencds.cqf.cds.providers;
 
-import org.opencds.cqf.cql.runtime.Code;
-import org.opencds.cqf.cql.runtime.CqlList;
-import org.opencds.cqf.cql.runtime.Interval;
+import org.opencds.cqf.cql.engine.runtime.Code;
+import org.opencds.cqf.cql.engine.runtime.CqlList;
+import org.opencds.cqf.cql.engine.runtime.Interval;
 
 public class Retrieve {
 
@@ -18,10 +18,9 @@ public class Retrieve {
     private String dateHighPath;
     private Interval dateRange;
 
-    public Retrieve(String context, Object contextValue, String dataType, String templateId,
-                    String codePath, Iterable<Code> codes, String valueSet, String datePath,
-                    String dateLowPath, String dateHighPath, Interval dateRange)
-    {
+    public Retrieve(String context, Object contextValue, String dataType, String templateId, String codePath,
+            Iterable<Code> codes, String valueSet, String datePath, String dateLowPath, String dateHighPath,
+            Interval dateRange) {
         this.context = context;
         this.contextValue = contextValue;
         this.dataType = dataType;
@@ -43,16 +42,11 @@ public class Retrieve {
 
         Retrieve retrieve = (Retrieve) other;
 
-        if (!isEquivalent(context, retrieve.context)
-                || !isEquivalent(contextValue, retrieve.contextValue)
-                || !isEquivalent(dataType, retrieve.dataType)
-                || !isEquivalent(templateId, retrieve.templateId)
-                || !isEquivalent(codePath, retrieve.codePath)
-                || !isEquivalent(valueSet, retrieve.valueSet)
-                || !isEquivalent(datePath, retrieve.datePath)
-                || !isEquivalent(dateLowPath, retrieve.dateLowPath)
-                || !isEquivalent(dateHighPath, retrieve.dateHighPath))
-        {
+        if (!isEquivalent(context, retrieve.context) || !isEquivalent(contextValue, retrieve.contextValue)
+                || !isEquivalent(dataType, retrieve.dataType) || !isEquivalent(templateId, retrieve.templateId)
+                || !isEquivalent(codePath, retrieve.codePath) || !isEquivalent(valueSet, retrieve.valueSet)
+                || !isEquivalent(datePath, retrieve.datePath) || !isEquivalent(dateLowPath, retrieve.dateLowPath)
+                || !isEquivalent(dateHighPath, retrieve.dateHighPath)) {
             return false;
         }
 
@@ -64,8 +58,7 @@ public class Retrieve {
                 if (!CqlList.equivalent(codes, retrieve.codes)) {
                     return false;
                 }
-            }
-            else if (retrieve.codes != null) {
+            } else if (retrieve.codes != null) {
                 return false;
             }
 
@@ -76,8 +69,7 @@ public class Retrieve {
                 if (!dateRange.equivalent(retrieve.dateRange)) {
                     return false;
                 }
-            }
-            else if (retrieve.dateRange != null) {
+            } else if (retrieve.dateRange != null) {
                 return false;
             }
         }

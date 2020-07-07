@@ -9,8 +9,8 @@ import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.Parameters;
 import org.hl7.fhir.dstu3.model.PlanDefinition;
 import org.hl7.fhir.dstu3.model.Resource;
-import org.opencds.cqf.cql.execution.Context;
-import org.opencds.cqf.cql.terminology.TerminologyProvider;
+import org.opencds.cqf.cql.engine.execution.Context;
+import org.opencds.cqf.cql.engine.terminology.TerminologyProvider;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -18,8 +18,7 @@ import java.util.stream.Collectors;
 public class Stu3EvaluationContext extends EvaluationContext<PlanDefinition> {
 
     public Stu3EvaluationContext(Hook hook, FhirVersionEnum fhirVersion, IGenericClient fhirClient,
-                                 TerminologyProvider terminologyProvider, Context context, Library library, PlanDefinition planDefinition)
-    {
+            TerminologyProvider terminologyProvider, Context context, Library library, PlanDefinition planDefinition) {
         super(hook, fhirVersion, fhirClient, context, library, planDefinition);
     }
 
@@ -32,8 +31,10 @@ public class Stu3EvaluationContext extends EvaluationContext<PlanDefinition> {
         Parameters parameters = new Parameters();
         parameters.addParameter().setName("resourceBundle").setResource(bundle);
 
-        Parameters ret = this.getSystemFhirClient().operation().onType(Bundle.class).named("$apply-cql").withParameters(parameters).execute();
+        Parameters ret = this.getSystemFhirClient().operation().onType(Bundle.class).named("$apply-cql")
+                .withParameters(parameters).execute();
         Bundle appliedResources = (Bundle) ret.getParameter().get(0).getResource();
-        return appliedResources.getEntry().stream().map(Bundle.BundleEntryComponent::getResource).collect(Collectors.toList());
+        return appliedResources.getEntry().stream().map(Bundle.BundleEntryComponent::getResource)
+                .collect(Collectors.toList());
     }
 }
