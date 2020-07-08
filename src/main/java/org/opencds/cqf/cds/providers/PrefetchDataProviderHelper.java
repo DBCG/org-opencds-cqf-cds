@@ -18,6 +18,10 @@ public class PrefetchDataProviderHelper {
 
     public static Map<String, List<Object>> populateMap(List<Object> resources) {
         Map<String, List<Object>> prefetchResources = new HashMap<>();
+        if (resources == null){
+            return prefetchResources;
+        }
+        
         for (Object resource : resources) {
             if (resource instanceof Resource) {
                 if (prefetchResources.containsKey(((Resource) resource).fhirType())) {

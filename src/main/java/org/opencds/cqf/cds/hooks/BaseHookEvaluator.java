@@ -7,6 +7,7 @@ import org.opencds.cqf.cds.evaluation.EvaluationContext;
 import org.opencds.cqf.cds.providers.PrefetchDataProviderDstu2;
 import org.opencds.cqf.cds.providers.PrefetchDataProviderR4;
 import org.opencds.cqf.cds.providers.PrefetchDataProviderStu3;
+import org.opencds.cqf.cds.providers.PriorityRetrieveProvider;
 import org.opencds.cqf.cds.response.CdsCard;
 import org.cqframework.cql.elm.execution.ListTypeSpecifier;
 import org.cqframework.cql.elm.execution.ParameterDef;
@@ -48,23 +49,25 @@ public abstract class BaseHookEvaluator<P extends IBaseResource> {
         TerminologyAwareRetrieveProvider prefetchRetriever;
         ModelResolver resolver;
         if (context.getFhirVersion() == FhirVersionEnum.DSTU3) {
-            prefetchRetriever = new PrefetchDataProviderStu3(context.getPrefetchResources(), remoteRetriever);
+            prefetchRetriever = new PrefetchDataProviderStu3(context.getPrefetchResources());
             resolver = new Dstu3FhirModelResolver();
 
         } else if (context.getFhirVersion() == FhirVersionEnum.DSTU2) {
-            prefetchRetriever = new PrefetchDataProviderDstu2(context.getPrefetchResources(), remoteRetriever);
+            prefetchRetriever = new PrefetchDataProviderDstu2(context.getPrefetchResources());
             resolver = new Dstu2FhirModelResolver();
         }
 
         else {
-            prefetchRetriever = new PrefetchDataProviderR4(context.getPrefetchResources(), remoteRetriever);
+            prefetchRetriever = new PrefetchDataProviderR4(context.getPrefetchResources());
             resolver = new R4FhirModelResolver();
         }
 
         // TODO: Get the "system" terminology provider.
         prefetchRetriever.setTerminologyProvider(context.getContext().resolveTerminologyProvider());
+
+        PriorityRetrieveProvider priorityRetrieveProvider = new PriorityRetrieveProvider(prefetchRetriever, remoteRetriever);
         context.getContext().registerDataProvider("http://hl7.org/fhir",
-                new CompositeDataProvider(resolver, prefetchRetriever));
+                new CompositeDataProvider(resolver, priorityRetrieveProvider));
         context.getContext().registerTerminologyProvider(prefetchRetriever.getTerminologyProvider());
 
         return evaluateCdsHooksPlanDefinition(context.getContext(), context.getPlanDefinition(),

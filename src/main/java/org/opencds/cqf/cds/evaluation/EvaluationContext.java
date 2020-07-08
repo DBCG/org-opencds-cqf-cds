@@ -98,8 +98,6 @@ public abstract class EvaluationContext<T extends IBaseResource> {
     private DataProvider getDataProvider() {
         if (remoteProvider == null) {
             ModelResolver resolver;
-
-            // TODO: Need to factor out all the SearchParamRegistry stuff.
             TerminologyProvider terminologyProvider;
             switch (fhirVersion) {
                 case DSTU2:

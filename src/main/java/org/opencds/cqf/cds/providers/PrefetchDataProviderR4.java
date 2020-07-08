@@ -17,11 +17,9 @@ public class PrefetchDataProviderR4 extends TerminologyAwareRetrieveProvider {
 
     private Map<String, List<Object>> prefetchResources;
     private ModelResolver resolver;
-    private RetrieveProvider remoteProvider;
 
-    public PrefetchDataProviderR4(List<Object> resources, RetrieveProvider remoteProvider) {
+    public PrefetchDataProviderR4(List<Object> resources) {
         prefetchResources = PrefetchDataProviderHelper.populateMap(resources);
-        this.remoteProvider = remoteProvider;
         this.resolver = new R4FhirModelResolver();
     }
 
@@ -41,8 +39,7 @@ public class PrefetchDataProviderR4 extends TerminologyAwareRetrieveProvider {
         // This dataType can't be related to patient, therefore may
         // not be in the pre-fetch bundle, or might required a lookup by Id
         if (context.equals("Patient") && contextPath == null) {
-            return remoteProvider.retrieve(context, contextPath, contextValue, dataType, templateId, codePath, codes,
-                    valueSet, datePath, dateLowPath, dateHighPath, dateRange);
+            return null;
         }
 
         List<Object> resourcesOfType = prefetchResources.get(dataType);

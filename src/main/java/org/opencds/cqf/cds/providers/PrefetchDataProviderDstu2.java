@@ -17,18 +17,18 @@ public class PrefetchDataProviderDstu2 extends TerminologyAwareRetrieveProvider 
 
     private Map<String, List<Object>> prefetchResources;
     private ModelResolver resolver;
-    private RetrieveProvider remoteProvider;
-
-    public PrefetchDataProviderDstu2(List<Object> resources, RetrieveProvider remoteProvider) {
+    
+    public PrefetchDataProviderDstu2(List<Object> resources) {
         prefetchResources = PrefetchDataProviderHelper.populateMap(resources);
         this.resolver = new Dstu2FhirModelResolver();
-        this.remoteProvider = remoteProvider;
     }
 
     @Override
     public Iterable<Object> retrieve(String context, String contextPath, Object contextValue, String dataType,
             String templateId, String codePath, Iterable<Code> codes, String valueSet, String datePath,
             String dateLowPath, String dateHighPath, Interval dateRange) {
+
+                
         if (codePath == null && (codes != null || valueSet != null)) {
             throw new IllegalArgumentException("A code path must be provided when filtering on codes or a valueset.");
         }
@@ -41,8 +41,7 @@ public class PrefetchDataProviderDstu2 extends TerminologyAwareRetrieveProvider 
         // This dataType can't be related to patient, therefore may
         // not be in the pre-fetch bundle, or might required a lookup by Id
         if (context.equals("Patient") && contextPath == null) {
-            return remoteProvider.retrieve(context, contextPath, contextValue, dataType, templateId, codePath, codes,
-                    valueSet, datePath, dateLowPath, dateHighPath, dateRange);
+            return null;
         }
 
         List<Object> resourcesOfType = prefetchResources.get(dataType);

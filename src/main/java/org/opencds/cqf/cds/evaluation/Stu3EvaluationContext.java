@@ -12,6 +12,7 @@ import org.hl7.fhir.dstu3.model.Resource;
 import org.opencds.cqf.cql.engine.execution.Context;
 import org.opencds.cqf.cql.engine.terminology.TerminologyProvider;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -24,6 +25,10 @@ public class Stu3EvaluationContext extends EvaluationContext<PlanDefinition> {
 
     @Override
     List<Object> applyCqlToResources(List<Object> resources) {
+        if (resources == null || resources.isEmpty()) {
+            return new ArrayList<>();
+        }
+        
         Bundle bundle = new Bundle();
         for (Object res : resources) {
             bundle.addEntry(new Bundle.BundleEntryComponent().setResource((Resource) res));
