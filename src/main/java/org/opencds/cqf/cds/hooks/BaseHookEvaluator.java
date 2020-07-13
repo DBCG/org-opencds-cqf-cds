@@ -45,6 +45,7 @@ public abstract class BaseHookEvaluator<P extends IBaseResource> {
                 new SearchParameterResolver(context.getFhirContext()), context.getHookFhirClient());
 
         remoteRetriever.setTerminologyProvider(context.getContext().resolveTerminologyProvider());
+        remoteRetriever.setExpandValueSets(true);
 
         TerminologyAwareRetrieveProvider prefetchRetriever;
         ModelResolver resolver;
