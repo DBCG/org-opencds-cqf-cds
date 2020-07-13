@@ -121,6 +121,7 @@ public abstract class EvaluationContext<T extends IBaseResource> {
             RestFhirRetrieveProvider provider = new RestFhirRetrieveProvider(
                     new SearchParameterResolver(this.fhirContext), this.getHookFhirClient());
             provider.setTerminologyProvider(terminologyProvider);
+            provider.setExpandValueSets(true);
 
             this.remoteProvider = new CompositeDataProvider(resolver, provider);
         }
