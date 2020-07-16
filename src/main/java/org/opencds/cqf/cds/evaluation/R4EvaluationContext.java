@@ -4,6 +4,7 @@ import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 
 import org.opencds.cqf.cds.hooks.Hook;
+import org.opencds.cqf.cds.providers.ProviderConfiguration;
 import org.cqframework.cql.elm.execution.Library;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Parameters;
@@ -19,8 +20,8 @@ import java.util.stream.Collectors;
 public class R4EvaluationContext extends EvaluationContext<PlanDefinition> {
 
     public R4EvaluationContext(Hook hook, FhirVersionEnum fhirVersion, IGenericClient fhirClient,
-            TerminologyProvider terminologyProvider, Context context, Library library, PlanDefinition planDefinition) {
-        super(hook, fhirVersion, fhirClient, context, library, planDefinition);
+            TerminologyProvider terminologyProvider, Context context, Library library, PlanDefinition planDefinition, ProviderConfiguration providerConfiguration) {
+        super(hook, fhirVersion, fhirClient, context, library, planDefinition, providerConfiguration);
     }
 
     @Override

@@ -41,11 +41,13 @@ public abstract class BaseHookEvaluator<P extends IBaseResource> {
         }
 
         // Remote data retriever
-        TerminologyAwareRetrieveProvider remoteRetriever = new RestFhirRetrieveProvider(
+        RestFhirRetrieveProvider remoteRetriever = new RestFhirRetrieveProvider(
                 new SearchParameterResolver(context.getFhirContext()), context.getHookFhirClient());
 
         remoteRetriever.setTerminologyProvider(context.getContext().resolveTerminologyProvider());
-        remoteRetriever.setExpandValueSets(true);
+        remoteRetriever.setExpandValueSets(context.getProviderConfiguration().getExpandValueSets());
+        remoteRetriever.setMaxCodesPerQuery(context.getProviderConfiguration().getMaxCodesPerQuery());
+        remoteRetriever.setSearchStyle(context.getProviderConfiguration().getSearchStyle());
 
         TerminologyAwareRetrieveProvider prefetchRetriever;
         ModelResolver resolver;
