@@ -18,6 +18,7 @@
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 
         <cql-engine.version>1.5.0-SNAPSHOT</cql-engine.version>
+        <cql-evaluator-execution.version>1.0.0-SNAPSHOT</cql-evaluator-execution.version>
     </properties>
 
     <name>cds-hooks</name>
@@ -59,6 +60,12 @@
     </repositories>
 
     <dependencies>
+        <dependency>
+            <groupId>org.opencds.cqf.cql</groupId>
+            <artifactId>evaluator.execution</artifactId>
+            <version>${cql-evaluator-execution.version}</version>
+        </dependency>
+
         <dependency>
             <groupId>org.opencds.cqf.cql</groupId>
             <artifactId>engine</artifactId>

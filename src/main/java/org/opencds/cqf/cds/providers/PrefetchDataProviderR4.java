@@ -1,5 +1,6 @@
 package org.opencds.cqf.cds.providers;
 
+import ca.uhn.fhir.context.FhirVersionEnum;
 import org.opencds.cqf.cql.engine.retrieve.RetrieveProvider;
 import org.opencds.cqf.cql.engine.retrieve.TerminologyAwareRetrieveProvider;
 import org.opencds.cqf.cql.engine.elm.execution.InEvaluator;
@@ -112,7 +113,7 @@ public class PrefetchDataProviderR4 extends TerminologyAwareRetrieveProvider {
                 if (codes != null) {
                     Object codeObject = PrefetchDataProviderHelper
                             .getR4Code(this.resolver.resolvePath(resource, codePath));
-                    includeResource = PrefetchDataProviderHelper.checkCodeMembership(codes, codeObject);
+                    includeResource = PrefetchDataProviderHelper.checkCodeMembership(codes, codeObject, FhirVersionEnum.R4);
                 }
             }
 
