@@ -1,5 +1,7 @@
 package org.opencds.cqf.cds.providers;
 
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.model.dstu2.composite.CodeableConceptDt;
 import ca.uhn.fhir.model.dstu2.composite.CodingDt;
 import ca.uhn.fhir.model.dstu2.composite.PeriodDt;
@@ -186,22 +188,17 @@ public class PrefetchDataProviderHelper {
         return codeObject;
     }
 
-    public static boolean checkCodeMembership(Iterable<Code> codes, Object codeObject) {
-        // for now, just checking whether code values are equal... TODO - add
-        // intelligent checks for system and version
-        for (Code code : codes) {
-            if (codeObject instanceof String && code.getCode().equals(codeObject)) {
+    public static boolean checkCodeMembership(Iterable<Code> codes, Object codeObject, FhirContext fhirContext) {
+        List<Code> qualifyingCodes = new ArrayList<Code>();
+
+        if (codeObject != null) {
+            qualifyingCodes = org.opencds.cqf.cql.evaluator.execution.util.CodeUtil.getElmCodesFromObject(codeObject, fhirContext);
+
+            if (!qualifyingCodes.isEmpty()) {
                 return true;
-            } else if (codeObject instanceof Code && code.getCode().equals(((Code) codeObject).getCode())) {
-                return true;
-            } else if (codeObject instanceof Iterable) {
-                for (Object obj : (Iterable) codeObject) {
-                    if (code.getCode().equals(((Code) obj).getCode())) {
-                        return true;
-                    }
-                }
             }
         }
+
         return false;
     }
 }

@@ -1,10 +1,12 @@
 package org.opencds.cqf.cds.providers;
 
+import ca.uhn.fhir.context.FhirVersionEnum;
 import org.opencds.cqf.cql.engine.retrieve.RetrieveProvider;
 import org.opencds.cqf.cql.engine.retrieve.TerminologyAwareRetrieveProvider;
 import org.opencds.cqf.cql.engine.elm.execution.InEvaluator;
 import org.opencds.cqf.cql.engine.elm.execution.IncludesEvaluator;
 import org.opencds.cqf.cql.engine.model.ModelResolver;
+import org.opencds.cqf.cql.engine.fhir.model.FhirModelResolver;
 import org.opencds.cqf.cql.engine.fhir.model.R4FhirModelResolver;
 import org.opencds.cqf.cql.engine.runtime.Code;
 import org.opencds.cqf.cql.engine.runtime.DateTime;
@@ -16,7 +18,7 @@ import java.util.*;
 public class PrefetchDataProviderR4 extends TerminologyAwareRetrieveProvider {
 
     private Map<String, List<Object>> prefetchResources;
-    private ModelResolver resolver;
+    private FhirModelResolver resolver;
 
     public PrefetchDataProviderR4(List<Object> resources) {
         prefetchResources = PrefetchDataProviderHelper.populateMap(resources);
@@ -112,7 +114,7 @@ public class PrefetchDataProviderR4 extends TerminologyAwareRetrieveProvider {
                 if (codes != null) {
                     Object codeObject = PrefetchDataProviderHelper
                             .getR4Code(this.resolver.resolvePath(resource, codePath));
-                    includeResource = PrefetchDataProviderHelper.checkCodeMembership(codes, codeObject);
+                    includeResource = PrefetchDataProviderHelper.checkCodeMembership(codes, codeObject, this.resolver.getFhirContext());
                 }
             }
 
