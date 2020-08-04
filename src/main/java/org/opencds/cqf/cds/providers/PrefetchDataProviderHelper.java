@@ -190,12 +190,16 @@ public class PrefetchDataProviderHelper {
 
     public static boolean checkCodeMembership(Iterable<Code> codes, Object codeObject, FhirVersionEnum fhirVersion) {
         FhirContext fhirContext = new FhirContext(fhirVersion);
-        List<Code> qualifyingCodes = org.opencds.cqf.cql.evaluator.execution.util.CodeUtil.getElmCodesFromObject(codeObject, fhirContext);
+        List<Code> qualifyingCodes = new ArrayList<Code>();
 
-        if (qualifyingCodes != null && !qualifyingCodes.isEmpty()) {
-            return true;
-        } else {
-            return false;
+        if (codeObject != null) {
+            qualifyingCodes = org.opencds.cqf.cql.evaluator.execution.util.CodeUtil.getElmCodesFromObject(codeObject, fhirContext);
+
+            if (!qualifyingCodes.isEmpty()) {
+                return true;
+            }
         }
+
+        return false;
     }
 }
