@@ -4,6 +4,7 @@ import ca.uhn.fhir.context.FhirVersionEnum;
 import org.opencds.cqf.cql.engine.elm.execution.InEvaluator;
 import org.opencds.cqf.cql.engine.elm.execution.IncludesEvaluator;
 import org.opencds.cqf.cql.engine.fhir.model.Dstu3FhirModelResolver;
+import org.opencds.cqf.cql.engine.fhir.model.FhirModelResolver;
 import org.opencds.cqf.cql.engine.model.ModelResolver;
 import org.opencds.cqf.cql.engine.retrieve.RetrieveProvider;
 import org.opencds.cqf.cql.engine.retrieve.TerminologyAwareRetrieveProvider;
@@ -17,7 +18,7 @@ import java.util.*;
 public class PrefetchDataProviderStu3 extends TerminologyAwareRetrieveProvider {
 
     private Map<String, List<Object>> prefetchResources;
-    private ModelResolver resolver;
+    private FhirModelResolver resolver;
 
     public PrefetchDataProviderStu3(List<Object> resources) {
         prefetchResources = PrefetchDataProviderHelper.populateMap(resources);
@@ -113,7 +114,7 @@ public class PrefetchDataProviderStu3 extends TerminologyAwareRetrieveProvider {
                 if (codes != null) {
                     Object codeObject = PrefetchDataProviderHelper
                             .getStu3Code(this.resolver.resolvePath(resource, codePath));
-                    includeResource = PrefetchDataProviderHelper.checkCodeMembership(codes, codeObject, FhirVersionEnum.DSTU3);
+                    includeResource = PrefetchDataProviderHelper.checkCodeMembership(codes, codeObject, this.resolver.getFhirContext());
                 }
             }
 

@@ -188,8 +188,7 @@ public class PrefetchDataProviderHelper {
         return codeObject;
     }
 
-    public static boolean checkCodeMembership(Iterable<Code> codes, Object codeObject, FhirVersionEnum fhirVersion) {
-        FhirContext fhirContext = new FhirContext(fhirVersion);
+    public static boolean checkCodeMembership(Iterable<Code> codes, Object codeObject, FhirContext fhirContext) {
         List<Code> qualifyingCodes = new ArrayList<Code>();
 
         if (codeObject != null) {
