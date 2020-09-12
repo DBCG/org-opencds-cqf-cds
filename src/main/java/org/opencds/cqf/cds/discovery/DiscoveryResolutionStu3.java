@@ -9,12 +9,26 @@ import java.util.List;
 public class DiscoveryResolutionStu3 {
 
     private final String PATIENT_ID_CONTEXT = "{{context.patientId}}";
-    private final int URI_MAX_LENGTH = 8000;
+    private final int DEFAULT_MAX_URI_LENGTH = 8000;
+    private int maxUriLength;
 
     private IGenericClient client;
 
     public DiscoveryResolutionStu3(IGenericClient client) {
         this.client = client;
+        this.maxUriLength = DEFAULT_MAX_URI_LENGTH;
+    }
+
+    public int getMaxUriLength() {
+        return this.maxUriLength;
+    }
+
+    public void setMaxUriLength(int maxUriLength) {
+        if (maxUriLength <= 0) {
+            throw new IllegalArgumentException("maxUriLength must be >0");
+        }
+
+        this.maxUriLength = maxUriLength;
     }
 
     public PlanDefinition resolvePlanDefinition(Bundle.BundleEntryComponent component) {
@@ -114,10 +128,10 @@ public class DiscoveryResolutionStu3 {
         String codeToken = system + "|" + code;
         int postAppendLength = codes.length() + codeToken.length();
 
-        if (codes.length() > 0 && postAppendLength < URI_MAX_LENGTH) {
+        if (codes.length() > 0 && postAppendLength < this.maxUriLength) {
             codes.append(",");
         }
-        else if (postAppendLength > URI_MAX_LENGTH) {
+        else if (postAppendLength > this.maxUriLength) {
             ret.add(codes.toString());
             codes = new StringBuilder();
         }
@@ -127,7 +141,7 @@ public class DiscoveryResolutionStu3 {
 
     public List<String> createRequestUrl(DataRequirement dataRequirement) {
         if (!isPatientCompartment(dataRequirement.getType())) return null;
-        String patientRelatedResource = dataRequirement.getType() + "?" + getPatientSearchParam(dataRequirement.getType()) + "=" + PATIENT_ID_CONTEXT;
+        String patientRelatedResource = dataRequirement.getType() + "?" + getPatientSearchParam(dataRequirement.getType()) + "=Patient/" + PATIENT_ID_CONTEXT;
         List<String> ret = new ArrayList<>();
         if (dataRequirement.hasCodeFilter()) {
             for (DataRequirement.DataRequirementCodeFilterComponent codeFilterComponent : dataRequirement.getCodeFilter()) {
