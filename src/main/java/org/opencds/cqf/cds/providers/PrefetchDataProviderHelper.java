@@ -13,6 +13,7 @@ import org.hl7.fhir.dstu3.model.*;
 import org.opencds.cqf.cql.engine.runtime.Code;
 import org.opencds.cqf.cql.engine.runtime.DateTime;
 import org.opencds.cqf.cql.engine.runtime.Interval;
+import org.opencds.cqf.cql.evaluator.execution.util.CodeUtil;
 
 import java.util.*;
 
@@ -188,11 +189,11 @@ public class PrefetchDataProviderHelper {
         return codeObject;
     }
 
-    public static boolean checkCodeMembership(Iterable<Code> codes, Object codeObject, FhirContext fhirContext) {
+    public static boolean checkCodeMembership(Iterable<Code> codes, Object codeObject, CodeUtil codeUtil) {
         List<Code> qualifyingCodes = new ArrayList<Code>();
 
         if (codeObject != null) {
-            qualifyingCodes = org.opencds.cqf.cql.evaluator.execution.util.CodeUtil.getElmCodesFromObject(codeObject, fhirContext);
+            qualifyingCodes = codeUtil.getElmCodesFromObject(codeObject);
 
             if (!qualifyingCodes.isEmpty()) {
                 return true;

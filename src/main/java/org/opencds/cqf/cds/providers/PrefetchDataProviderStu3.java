@@ -12,6 +12,7 @@ import org.opencds.cqf.cql.engine.runtime.Code;
 import org.opencds.cqf.cql.engine.runtime.DateTime;
 import org.opencds.cqf.cql.engine.runtime.Interval;
 import org.opencds.cqf.cql.engine.terminology.ValueSetInfo;
+import org.opencds.cqf.cql.evaluator.execution.util.CodeUtil;
 
 import java.util.*;
 
@@ -19,10 +20,12 @@ public class PrefetchDataProviderStu3 extends TerminologyAwareRetrieveProvider {
 
     private Map<String, List<Object>> prefetchResources;
     private FhirModelResolver resolver;
+    private CodeUtil codeUtil;
 
     public PrefetchDataProviderStu3(List<Object> resources) {
         prefetchResources = PrefetchDataProviderHelper.populateMap(resources);
         this.resolver = new Dstu3FhirModelResolver();
+        this.codeUtil = new CodeUtil(this.resolver.getFhirContext());
     }
 
     @Override
@@ -114,7 +117,7 @@ public class PrefetchDataProviderStu3 extends TerminologyAwareRetrieveProvider {
                 if (codes != null) {
                     Object codeObject = PrefetchDataProviderHelper
                             .getStu3Code(this.resolver.resolvePath(resource, codePath));
-                    includeResource = PrefetchDataProviderHelper.checkCodeMembership(codes, codeObject, this.resolver.getFhirContext());
+                    includeResource = PrefetchDataProviderHelper.checkCodeMembership(codes, codeObject, this.codeUtil);
                 }
             }
 
