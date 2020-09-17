@@ -7,7 +7,7 @@ cache:
   directories:
   - "$HOME/.m2/repository"
 install:
-- mvn install -U -DskipTests=true -Dmaven.javadoc.skip=true -B -V
+- ./scripts/install.sh
 script:
 - if [[ "$TRAVIS_BRANCH" =~ master* ]]; then mvn test -B -P release; fi
 - if ! [[ "$TRAVIS_BRANCH" =~ master* ]]; then mvn test -B; fi
