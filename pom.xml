@@ -17,8 +17,8 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 
-        <cql-engine.version>1.5.0-SNAPSHOT</cql-engine.version>
-        <cql-evaluator-execution.version>1.0.0-SNAPSHOT</cql-evaluator-execution.version>
+        <cql-engine.version>1.5.0</cql-engine.version>
+        <cql-evaluator-execution.version>1.0.0</cql-evaluator-execution.version>
     </properties>
 
     <name>cds-hooks</name>
