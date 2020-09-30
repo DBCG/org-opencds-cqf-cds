@@ -1,5 +1,7 @@
 package org.opencds.cqf.cds.providers;
 
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.model.dstu2.composite.CodeableConceptDt;
 import ca.uhn.fhir.model.dstu2.composite.CodingDt;
 import ca.uhn.fhir.model.dstu2.composite.PeriodDt;
@@ -11,6 +13,7 @@ import org.hl7.fhir.dstu3.model.*;
 import org.opencds.cqf.cql.engine.runtime.Code;
 import org.opencds.cqf.cql.engine.runtime.DateTime;
 import org.opencds.cqf.cql.engine.runtime.Interval;
+import org.opencds.cqf.cql.evaluator.execution.util.CodeUtil;
 
 import java.util.*;
 
@@ -18,6 +21,10 @@ public class PrefetchDataProviderHelper {
 
     public static Map<String, List<Object>> populateMap(List<Object> resources) {
         Map<String, List<Object>> prefetchResources = new HashMap<>();
+        if (resources == null){
+            return prefetchResources;
+        }
+        
         for (Object resource : resources) {
             if (resource instanceof Resource) {
                 if (prefetchResources.containsKey(((Resource) resource).fhirType())) {
@@ -182,22 +189,17 @@ public class PrefetchDataProviderHelper {
         return codeObject;
     }
 
-    public static boolean checkCodeMembership(Iterable<Code> codes, Object codeObject) {
-        // for now, just checking whether code values are equal... TODO - add
-        // intelligent checks for system and version
-        for (Code code : codes) {
-            if (codeObject instanceof String && code.getCode().equals(codeObject)) {
+    public static boolean checkCodeMembership(Iterable<Code> codes, Object codeObject, CodeUtil codeUtil) {
+        List<Code> qualifyingCodes = new ArrayList<Code>();
+
+        if (codeObject != null) {
+            qualifyingCodes = codeUtil.getElmCodesFromObject(codeObject);
+
+            if (!qualifyingCodes.isEmpty()) {
                 return true;
-            } else if (codeObject instanceof Code && code.getCode().equals(((Code) codeObject).getCode())) {
-                return true;
-            } else if (codeObject instanceof Iterable) {
-                for (Object obj : (Iterable) codeObject) {
-                    if (code.getCode().equals(((Code) obj).getCode())) {
-                        return true;
-                    }
-                }
             }
         }
+
         return false;
     }
 }

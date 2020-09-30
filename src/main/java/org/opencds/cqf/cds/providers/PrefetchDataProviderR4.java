@@ -1,28 +1,31 @@
 package org.opencds.cqf.cds.providers;
 
+import ca.uhn.fhir.context.FhirVersionEnum;
 import org.opencds.cqf.cql.engine.retrieve.RetrieveProvider;
 import org.opencds.cqf.cql.engine.retrieve.TerminologyAwareRetrieveProvider;
 import org.opencds.cqf.cql.engine.elm.execution.InEvaluator;
 import org.opencds.cqf.cql.engine.elm.execution.IncludesEvaluator;
 import org.opencds.cqf.cql.engine.model.ModelResolver;
+import org.opencds.cqf.cql.engine.fhir.model.FhirModelResolver;
 import org.opencds.cqf.cql.engine.fhir.model.R4FhirModelResolver;
 import org.opencds.cqf.cql.engine.runtime.Code;
 import org.opencds.cqf.cql.engine.runtime.DateTime;
 import org.opencds.cqf.cql.engine.runtime.Interval;
 import org.opencds.cqf.cql.engine.terminology.ValueSetInfo;
+import org.opencds.cqf.cql.evaluator.execution.util.CodeUtil;
 
 import java.util.*;
 
 public class PrefetchDataProviderR4 extends TerminologyAwareRetrieveProvider {
 
     private Map<String, List<Object>> prefetchResources;
-    private ModelResolver resolver;
-    private RetrieveProvider remoteProvider;
+    private FhirModelResolver resolver;
+    private CodeUtil codeUtil;
 
-    public PrefetchDataProviderR4(List<Object> resources, RetrieveProvider remoteProvider) {
+    public PrefetchDataProviderR4(List<Object> resources) {
         prefetchResources = PrefetchDataProviderHelper.populateMap(resources);
-        this.remoteProvider = remoteProvider;
         this.resolver = new R4FhirModelResolver();
+        this.codeUtil = new CodeUtil(this.resolver.getFhirContext());
     }
 
     @Override
@@ -41,8 +44,7 @@ public class PrefetchDataProviderR4 extends TerminologyAwareRetrieveProvider {
         // This dataType can't be related to patient, therefore may
         // not be in the pre-fetch bundle, or might required a lookup by Id
         if (context.equals("Patient") && contextPath == null) {
-            return remoteProvider.retrieve(context, contextPath, contextValue, dataType, templateId, codePath, codes,
-                    valueSet, datePath, dateLowPath, dateHighPath, dateRange);
+            return null;
         }
 
         List<Object> resourcesOfType = prefetchResources.get(dataType);
@@ -115,7 +117,7 @@ public class PrefetchDataProviderR4 extends TerminologyAwareRetrieveProvider {
                 if (codes != null) {
                     Object codeObject = PrefetchDataProviderHelper
                             .getR4Code(this.resolver.resolvePath(resource, codePath));
-                    includeResource = PrefetchDataProviderHelper.checkCodeMembership(codes, codeObject);
+                    includeResource = PrefetchDataProviderHelper.checkCodeMembership(codes, codeObject, this.codeUtil);
                 }
             }
 

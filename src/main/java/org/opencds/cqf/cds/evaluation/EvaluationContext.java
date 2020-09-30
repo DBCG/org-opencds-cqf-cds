@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.List;
 
 import org.opencds.cqf.cds.hooks.Hook;
+import org.opencds.cqf.cds.providers.ProviderConfiguration;
 import org.opencds.cqf.cds.exceptions.NotImplementedException;
 
 import org.cqframework.cql.elm.execution.Library;
@@ -45,8 +46,10 @@ public abstract class EvaluationContext<T extends IBaseResource> {
 
     private IGenericClient client;
 
+    private ProviderConfiguration providerConfiguration;
+
     public EvaluationContext(Hook hook, FhirVersionEnum fhirVersion, IGenericClient fhirClient, Context context,
-            Library library, T planDefinition) {
+            Library library, T planDefinition, ProviderConfiguration providerConfiguration) {
 
         // How to determine if it's a local server?
         // Local Server url?
@@ -61,6 +64,8 @@ public abstract class EvaluationContext<T extends IBaseResource> {
         this.library = library;
 
         this.client = fhirClient;
+
+        this.providerConfiguration = providerConfiguration;
 
         context.registerDataProvider("http://hl7.org/fhir", getDataProvider());
     }
@@ -98,8 +103,6 @@ public abstract class EvaluationContext<T extends IBaseResource> {
     private DataProvider getDataProvider() {
         if (remoteProvider == null) {
             ModelResolver resolver;
-
-            // TODO: Need to factor out all the SearchParamRegistry stuff.
             TerminologyProvider terminologyProvider;
             switch (fhirVersion) {
                 case DSTU2:
@@ -123,6 +126,11 @@ public abstract class EvaluationContext<T extends IBaseResource> {
             RestFhirRetrieveProvider provider = new RestFhirRetrieveProvider(
                     new SearchParameterResolver(this.fhirContext), this.getHookFhirClient());
             provider.setTerminologyProvider(terminologyProvider);
+            provider.setExpandValueSets(true);
+
+            provider.setExpandValueSets(this.providerConfiguration.getExpandValueSets());
+            provider.setMaxCodesPerQuery(this.providerConfiguration.getMaxCodesPerQuery());
+            provider.setSearchStyle(this.providerConfiguration.getSearchStyle());
 
             this.remoteProvider = new CompositeDataProvider(resolver, provider);
         }
@@ -183,6 +191,10 @@ public abstract class EvaluationContext<T extends IBaseResource> {
         client.registerInterceptor(loggingInterceptor);
 
         return client;
+    }
+
+    public ProviderConfiguration getProviderConfiguration() {
+        return this.providerConfiguration;
     }
 
     // NOTE: This is an operation defined in the cqf-ruler
