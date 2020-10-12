@@ -196,7 +196,14 @@ public class PrefetchDataProviderHelper {
             qualifyingCodes = codeUtil.getElmCodesFromObject(codeObject);
 
             if (!qualifyingCodes.isEmpty()) {
-                return true;
+                for (Code qualifyingCode : qualifyingCodes) {
+                    for (Code code : codes) {
+                        if ((qualifyingCode.getSystem() == null || qualifyingCode.getSystem().equals(code.getSystem())
+                                && qualifyingCode.getCode() != null && qualifyingCode.getCode().equals(code.getCode()))) {
+                            return true;
+                        }
+                    }
+                }
             }
         }
 
