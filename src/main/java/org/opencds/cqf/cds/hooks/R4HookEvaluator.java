@@ -113,7 +113,7 @@ public class R4HookEvaluator extends BaseHookEvaluator<PlanDefinition> {
                         actionBuilder.buildType(action.getType());
                     }
                     if (action.hasDefinition()) {
-                        if (action.getDefinitionCanonicalType().getValue().startsWith("ActivityDefinition")) {
+                        if (action.getDefinitionCanonicalType().getValue().contains("ActivityDefinition")) {
                             Parameters inParams = new Parameters();
                             inParams.addParameter().setName("patient").setValue(new StringType(patientId));
                             Parameters outParams = applyClient.operation()
