@@ -1,6 +1,7 @@
 package org.opencds.cqf.cds.response;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.parser.IParser;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
@@ -18,16 +19,26 @@ public class CdsCard {
     /*
     *
     * Specification v1.0:
-    *   summary     - REQUIRED  - String
-    *   detail      - OPTIONAL  - String
-    *   indicator   - REQUIRED  - String
-    *   source      - REQUIRED  - Object
-    *   suggestions - OPTIONAL  - Array[suggestion]
-    *   links       - OPTIONAL  - Array[link]
+    *   summary             - REQUIRED  - String
+    *   detail              - OPTIONAL  - String
+    *   indicator           - REQUIRED  - String
+    *   source              - REQUIRED  - Object
+    *   suggestions         - OPTIONAL  - Array[suggestion]
+    *       label   - REQUIRED - String
+    *       uuid    - OPTIONAL - String
+    *       actions - Array[object]
+    *           type  - REQUIRED - String
+    *           description - REQUIRED - String
+    *           resource - OPTIONAL - object
+    *   selectionBehavior   - OPTIONAL (Required if suggestions != null) - String
+    *   links               - OPTIONAL  - Array[link]
     *
     * */
 
-    public CdsCard() {
+    private IParser jsonParser;
+
+    public CdsCard(IParser jsonParser) {
+        this.jsonParser = jsonParser;
         this.source = new Source();
         this.suggestions = new ArrayList<>();
         this.links = new ArrayList<>();
@@ -414,12 +425,14 @@ public class CdsCard {
                             throw new MissingRequiredFieldException("The suggestion.action.type field must be specified as either create, update, or remove in the action.type field in the PlanDefinition");
                         }
                         actionObj.addProperty("type", action.getType().toString());
+
                         if (!action.hasDescription()) {
                             throw new MissingRequiredFieldException("The suggestion.action.description field must be specified in the description field in the ActivityDefinition referenced in the PlanDefinition");
                         }
                         actionObj.addProperty("description", action.getDescription());
+
                         if (action.hasResource()) {
-                            JsonElement res = new JsonParser().parse(FhirContext.forDstu3().newJsonParser().setPrettyPrint(true).encodeResourceToString(action.getResource()));
+                            JsonElement res = new JsonParser().parse(jsonParser.encodeResourceToString(action.getResource()));
                             actionObj.add("resource", res);
                         }
                         actionArray.add(actionObj);

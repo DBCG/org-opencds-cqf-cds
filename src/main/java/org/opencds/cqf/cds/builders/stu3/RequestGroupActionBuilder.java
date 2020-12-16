@@ -24,7 +24,7 @@ public class RequestGroupActionBuilder extends BaseBuilder<RequestGroup.RequestG
         return this;
     }
 
-    public RequestGroupActionBuilder buildDescripition(String description) {
+    public RequestGroupActionBuilder buildDescription(String description) {
         complexProperty.setDescription(description);
         return this;
     }

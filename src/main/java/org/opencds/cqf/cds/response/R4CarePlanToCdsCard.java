@@ -1,5 +1,7 @@
 package org.opencds.cqf.cds.response;
 
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.parser.IParser;
 import org.hl7.fhir.r4.model.*;
 
 import java.util.ArrayList;
@@ -52,7 +54,8 @@ public class R4CarePlanToCdsCard {
 
         if (requestGroup.hasAction()) {
             for (RequestGroup.RequestGroupActionComponent action : requestGroup.getAction()) {
-                CdsCard card = new CdsCard();
+                IParser jsonParser = FhirContext.forR4().newJsonParser().setPrettyPrint(true);
+                CdsCard card = new CdsCard(jsonParser);
                 // basic
                 if (action.hasTitle()) {
                     card.setSummary(action.getTitle());

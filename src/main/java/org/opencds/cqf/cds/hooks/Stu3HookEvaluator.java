@@ -83,7 +83,7 @@ public class Stu3HookEvaluator extends BaseHookEvaluator<PlanDefinition> {
                         actionBuilder.buildTitle(action.getTitle());
                     }
                     if (action.hasDescription()) {
-                        actionBuilder.buildDescripition(action.getDescription());
+                        actionBuilder.buildDescription(action.getDescription());
                     }
 
                     // source
@@ -123,7 +123,7 @@ public class Stu3HookEvaluator extends BaseHookEvaluator<PlanDefinition> {
                                 actionBuilder.buildResource(referenceBuilder.build());
 
                                 if (activityDefinition.hasDescription()) {
-                                    actionBuilder.buildDescripition(activityDefinition.getDescription());
+                                    actionBuilder.buildDescription(activityDefinition.getDescription());
                                 }
                             }
 
@@ -156,7 +156,7 @@ public class Stu3HookEvaluator extends BaseHookEvaluator<PlanDefinition> {
                                 } else if (dynamicValue.getPath().endsWith("description")) { // detail
                                     String description = (String) context
                                             .resolveExpressionRef(dynamicValue.getExpression()).evaluate(context);
-                                    actionBuilder.buildDescripition(description);
+                                    actionBuilder.buildDescription(description);
                                 } else if (dynamicValue.getPath().endsWith("extension")) { // indicator
                                     String extension = (String) context
                                             .resolveExpressionRef(dynamicValue.getExpression()).evaluate(context);
