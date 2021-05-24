@@ -126,7 +126,6 @@ public abstract class EvaluationContext<T extends IBaseResource> {
             RestFhirRetrieveProvider provider = new RestFhirRetrieveProvider(
                     new SearchParameterResolver(this.fhirContext), this.getHookFhirClient());
             provider.setTerminologyProvider(terminologyProvider);
-            provider.setExpandValueSets(true);
 
             provider.setExpandValueSets(this.providerConfiguration.getExpandValueSets());
             provider.setMaxCodesPerQuery(this.providerConfiguration.getMaxCodesPerQuery());
@@ -156,7 +155,7 @@ public abstract class EvaluationContext<T extends IBaseResource> {
 
     public List<Object> getPrefetchResources() throws IOException {
         if (prefetchResources == null) {
-            prefetchResources = EvaluationHelper.resolvePrefetchResources(hook, fhirContext, this.getHookFhirClient());
+            prefetchResources = EvaluationHelper.resolvePrefetchResources(hook, fhirContext, this.getHookFhirClient(), this.providerConfiguration.getSearchStyle());
             if (hook.getRequest().isApplyCql()) {
                 prefetchResources = applyCqlToResources(prefetchResources);
             }
@@ -186,6 +185,7 @@ public abstract class EvaluationContext<T extends IBaseResource> {
         loggingInterceptor.setLogRequestBody(true);
         
         loggingInterceptor.setLogResponseSummary(true);
+        loggingInterceptor.setLogResponseHeaders(true);
         loggingInterceptor.setLogResponseBody(true);
 
         client.registerInterceptor(loggingInterceptor);

@@ -5,6 +5,7 @@ import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.rest.api.SearchStyleEnum;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import org.opencds.cqf.cds.hooks.Hook;
+import org.opencds.cqf.cds.providers.ProviderConfiguration;
 import org.opencds.cqf.cds.request.JsonHelper;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -95,7 +96,7 @@ public class EvaluationHelper {
         return ret;
     }
 
-    public static List<Object> resolvePrefetchResources(Hook hook, FhirContext fhirContext, IGenericClient client) throws IOException {
+    public static List<Object> resolvePrefetchResources(Hook hook, FhirContext fhirContext, IGenericClient client, SearchStyleEnum searchStyle) throws IOException {
         List<Object> prefetchResources = new ArrayList<>();
         List<String> prefetchElementsToFetch = new ArrayList<>();
         Gson gson = new GsonBuilder().create();
@@ -118,31 +119,36 @@ public class EvaluationHelper {
             prefetchElementsToFetch.addAll(hook.getRequest().getPrefetch().getDiscoveryPrefetchJson().keySet());
         }
 
-        for (String elementToFetch : prefetchElementsToFetch) {
-            String prefetchUrl = JsonHelper.getStringRequired(hook.getRequest().getPrefetch().getDiscoveryPrefetchJson(), elementToFetch);
-            ParameterMapHelper mapHelper = new ParameterMapHelper(prefetchUrl, hook);
-            Map<String, List<String>> map = mapHelper.getParameterMap();
-            if (mapHelper.isCompoundSearch()) {
-                List<IBaseResource> bundles = new ArrayList<>();
-                int count = 0;
-                while (count < map.get(mapHelper.getCompoundParam()).size()) {
-                    bundles.add(
-                            client.search()
-                                    .forResource(getResourceName(prefetchUrl))
-                                    .whereMap(mapHelper.getParameterMapCompundIncludeIndex(count))
-                                    .usingStyle(SearchStyleEnum.POST).execute()
-                    );
-                    ++count;
-                }
-                prefetchResources.addAll(resolveBundle(bundles, fhirContext));
-            }
-            else {
-                IBaseBundle bundle = client.search().forResource(getResourceName(prefetchUrl)).whereMap(map).usingStyle(SearchStyleEnum.POST).execute();
-                prefetchResources.addAll(resolveBundle(bundle, fhirContext));
-            }
-        }
+//        for (String elementToFetch : prefetchElementsToFetch) {
+//            String prefetchUrl = JsonHelper.getStringRequired(hook.getRequest().getPrefetch().getDiscoveryPrefetchJson(), elementToFetch);
+//            ParameterMapHelper mapHelper = new ParameterMapHelper(prefetchUrl, hook);
+//            Map<String, List<String>> map = mapHelper.getParameterMap();
+//            if (mapHelper.isCompoundSearch()) {
+//                List<IBaseResource> bundles = new ArrayList<>();
+//                int count = 0;
+//                while (count < map.get(mapHelper.getCompoundParam()).size()) {
+//                    bundles.add(
+//                            client.search()
+//                                    .forResource(getResourceName(prefetchUrl))
+//                                    .whereMap(mapHelper.getParameterMapCompundIncludeIndex(count))
+//                                    .usingStyle(searchStyle)
+//                                    .execute()
+//                    );
+//                    ++count;
+//                }
+//                prefetchResources.addAll(resolveBundle(bundles, fhirContext));
+//            }
+//            else {
+//                IBaseBundle bundle = client.search().forResource(getResourceName(prefetchUrl)).whereMap(map).usingStyle(searchStyle).execute();
+//                prefetchResources.addAll(resolveBundle(bundle, fhirContext));
+//            }
+//        }
 
         return prefetchResources;
+    }
+
+    public static List<Object> resolvePrefetchResources(Hook hook, FhirContext fhirContext, IGenericClient client) throws IOException {
+        return resolvePrefetchResources(hook, fhirContext, client, SearchStyleEnum.POST);
     }
 
     public static String getResourceName(String prefetchUrl) {
