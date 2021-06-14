@@ -24,7 +24,7 @@ public class RequestGroupActionBuilder extends BaseBuilder<RequestGroup.RequestG
         return this;
     }
 
-    public RequestGroupActionBuilder buildDescripition(String description) {
+    public RequestGroupActionBuilder buildDescription(String description) {
         complexProperty.setDescription(description);
         return this;
     }
@@ -36,6 +36,11 @@ public class RequestGroupActionBuilder extends BaseBuilder<RequestGroup.RequestG
 
     public RequestGroupActionBuilder buildType(Coding type) {
         complexProperty.setType(type);
+        return this;
+    }
+
+    public RequestGroupActionBuilder buildSelectionBehavior(RequestGroup.ActionSelectionBehavior selectionBehavior) {
+        complexProperty.setSelectionBehavior(selectionBehavior);
         return this;
     }
 

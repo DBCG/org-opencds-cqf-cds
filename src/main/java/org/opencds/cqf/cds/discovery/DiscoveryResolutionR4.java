@@ -181,7 +181,7 @@ public class DiscoveryResolutionR4 {
         if (!isEca(planDefinition)) return null;
         Library library = resolvePrimaryLibrary(planDefinition);
         // TODO: resolve data requirements
-        if (!library.hasDataRequirement()) return null;
+        if (library == null || !library.hasDataRequirement()) return null;
         for (DataRequirement dataRequirement : library.getDataRequirement()) {
             List<String> requestUrls = createRequestUrl(dataRequirement);
             if (requestUrls != null) {

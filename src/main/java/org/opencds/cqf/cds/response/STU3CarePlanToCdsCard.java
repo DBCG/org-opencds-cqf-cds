@@ -1,5 +1,7 @@
 package org.opencds.cqf.cds.response;
 
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.parser.IParser;
 import org.hl7.fhir.dstu3.model.*;
 
 import java.util.ArrayList;
@@ -52,7 +54,8 @@ public class STU3CarePlanToCdsCard {
 
         if (requestGroup.hasAction()) {
             for (RequestGroup.RequestGroupActionComponent action : requestGroup.getAction()) {
-                CdsCard card = new CdsCard();
+                IParser jsonParser = FhirContext.forDstu3().newJsonParser().setPrettyPrint(true);
+                CdsCard card = new CdsCard(jsonParser);
                 // basic
                 if (action.hasTitle()) {
                     card.setSummary(action.getTitle());
@@ -80,6 +83,10 @@ public class STU3CarePlanToCdsCard {
                     }
 
                     card.setSource(source);
+                }
+
+                if (action.hasSelectionBehavior()) {
+                    card.setSelectionBehavior(action.getSelectionBehavior().toCode());
                 }
 
                 // suggestions

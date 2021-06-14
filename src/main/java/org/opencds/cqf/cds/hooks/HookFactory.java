@@ -11,6 +11,7 @@ public class HookFactory {
             case "medication-prescribe": return new MedicationPrescribeHook(request);
             case "order-review": return new OrderReviewHook(request);
             case "order-select": return new OrderSelectHook(request);
+            case "order-sign": return new OrderSignHook(request);
             default: throw new InvalidHookException("Unknown Hook: " + request.getHook());
         }
     }
