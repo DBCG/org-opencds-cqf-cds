@@ -39,6 +39,11 @@ public class RequestGroupActionBuilder extends BaseBuilder<RequestGroup.RequestG
         return this;
     }
 
+    public RequestGroupActionBuilder buildSelectionBehavior(RequestGroup.ActionSelectionBehavior selectionBehavior) {
+        complexProperty.setSelectionBehavior(selectionBehavior);
+        return this;
+    }
+
     public RequestGroupActionBuilder buildResource(Reference resource) {
         complexProperty.setResource(resource);
         return this;

@@ -112,6 +112,9 @@ public class R4HookEvaluator extends BaseHookEvaluator<PlanDefinition> {
                     if (action.hasType()) {
                         actionBuilder.buildType(action.getType());
                     }
+                    if (action.hasSelectionBehavior()) {
+                        actionBuilder.buildSelectionBehavior(RequestGroup.ActionSelectionBehavior.fromCode(action.getSelectionBehavior().toCode()));
+                    }
                     if (action.hasDefinition()) {
                         if (action.getDefinitionCanonicalType().getValue().contains("ActivityDefinition")) {
                             Parameters inParams = new Parameters();

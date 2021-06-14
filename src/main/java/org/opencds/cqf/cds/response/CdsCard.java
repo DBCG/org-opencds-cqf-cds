@@ -31,6 +31,9 @@ public class CdsCard {
     *           description - REQUIRED - String
     *           resource - OPTIONAL - object
     *   selectionBehavior   - OPTIONAL (Required if suggestions != null) - String
+    *       Allowed values are:
+    *           at-most-one, indicating that the user may choose none or at most one of the suggestions;
+    *           any, indicating that the end user may choose any number of suggestions including none of them and all of them.
     *   links               - OPTIONAL  - Array[link]
     *
     * */
@@ -285,6 +288,19 @@ public class CdsCard {
             }
         }
     }
+
+    private String selectionBehavior;
+    public boolean hasSelectionBehavior() {
+        return this.selectionBehavior != null && !this.selectionBehavior.isEmpty();
+    }
+    public String getSelectionBehavior() {
+        return this.selectionBehavior;
+    }
+    public CdsCard setSelectionBehavior(String selectionBehavior) {
+        this.selectionBehavior = selectionBehavior;
+        return this;
+    }
+
     public boolean hasSuggestions() {
         return this.suggestions != null && !this.suggestions.isEmpty();
     }
@@ -405,6 +421,10 @@ public class CdsCard {
             sourceObject.addProperty("icon", source.getIcon().toString());
         }
         card.add("source", sourceObject);
+
+        if (hasSelectionBehavior()) {
+            card.addProperty("selectionBehavior", getSelectionBehavior());
+        }
 
         if (hasSuggestions()) {
             JsonArray suggestionArray = new JsonArray();

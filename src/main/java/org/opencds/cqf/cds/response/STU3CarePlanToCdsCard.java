@@ -85,6 +85,10 @@ public class STU3CarePlanToCdsCard {
                     card.setSource(source);
                 }
 
+                if (action.hasSelectionBehavior()) {
+                    card.setSelectionBehavior(action.getSelectionBehavior().toCode());
+                }
+
                 // suggestions
                 // TODO - uuid
                 boolean hasSuggestions = false;

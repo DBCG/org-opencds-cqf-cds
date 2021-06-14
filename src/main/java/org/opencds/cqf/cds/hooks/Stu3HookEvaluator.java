@@ -112,6 +112,9 @@ public class Stu3HookEvaluator extends BaseHookEvaluator<PlanDefinition> {
                     if (action.hasType()) {
                         actionBuilder.buildType(action.getType());
                     }
+                    if (action.hasSelectionBehavior()) {
+                        actionBuilder.buildSelectionBehavior(RequestGroup.ActionSelectionBehavior.fromCode(action.getSelectionBehavior().toCode()));
+                    }
                     if (action.hasDefinition()) {
                         if (action.getDefinition().getReferenceElement().getResourceType()
                                 .equals("ActivityDefinition")) {
