@@ -9,9 +9,11 @@ cache:
 install:
 - ./scripts/install.sh
 script:
-- ./scripts/build.sh
+- ./scripts/test.sh
 before_cache:
 - rm -rf $HOME/.m2/repository/org/opencds/cqf/cds
+after_success:
+- ./scripts/deploy.sh
 notifications:
   slack:
     - rooms:
