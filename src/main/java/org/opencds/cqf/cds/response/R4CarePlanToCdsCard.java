@@ -105,6 +105,9 @@ public class R4CarePlanToCdsCard {
                         actions.setType(CdsCard.Suggestions.Action.ActionType.valueOf(code.equals("remove") ? "delete" : code));
                     }
                     if (action.hasResource()) {
+                        if (actions.getType().name().equalsIgnoreCase("create")) {
+                            action.getResourceTarget().setId((String)null);
+                        }
                         actions.setResource(action.getResourceTarget());
                     }
                 }
