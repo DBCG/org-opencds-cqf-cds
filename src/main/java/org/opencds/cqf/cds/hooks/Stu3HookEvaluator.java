@@ -8,6 +8,7 @@ import org.opencds.cqf.cds.response.STU3CarePlanToCdsCard;
 import org.opencds.cqf.cds.response.CdsCard;
 import org.hl7.fhir.dstu3.model.*;
 import org.opencds.cqf.cql.engine.execution.Context;
+import org.opencds.cqf.cql.engine.fhir.model.Dstu3FhirModelResolver;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -115,6 +116,8 @@ public class Stu3HookEvaluator extends BaseHookEvaluator<PlanDefinition> {
                     if (action.hasSelectionBehavior()) {
                         actionBuilder.buildSelectionBehavior(RequestGroup.ActionSelectionBehavior.fromCode(action.getSelectionBehavior().toCode()));
                     }
+
+                    Resource resource = null;
                     if (action.hasDefinition()) {
                         if (action.getDefinition().getReferenceElement().getResourceType()
                                 .equals("ActivityDefinition")) {
@@ -138,11 +141,7 @@ public class Stu3HookEvaluator extends BaseHookEvaluator<PlanDefinition> {
                                     .named("$apply").withParameters(inParams).useHttpGet().execute();
 
                             List<Parameters.ParametersParameterComponent> response = outParams.getParameter();
-                            Resource resource = response.get(0).getResource().setId(UUID.randomUUID().toString());
-
-                            actionBuilder.buildResourceTarget(resource);
-                            actionBuilder
-                                    .buildResource(new ReferenceBuilder().buildReference(resource.getId()).build());
+                            resource = response.get(0).getResource().setId(UUID.randomUUID().toString());
                         }
                     }
 
@@ -164,6 +163,21 @@ public class Stu3HookEvaluator extends BaseHookEvaluator<PlanDefinition> {
                                     String extension = (String) context
                                             .resolveExpressionRef(dynamicValue.getExpression()).evaluate(context);
                                     actionBuilder.buildExtension(extension);
+                                } else {
+                                    if (resource != null) {
+                                        Object value = (Object) context.resolveExpressionRef(dynamicValue.getExpression()).evaluate(context);
+
+                                        // TODO need to verify type... yay
+                                        if (value instanceof Boolean) {
+                                            value = new BooleanType((Boolean) value);
+                                        }
+
+                                        Dstu3FhirModelResolver modelResolver = new Dstu3FhirModelResolver();
+                                        modelResolver.setValue(resource, dynamicValue.getPath(), value);
+
+                                        actionBuilder.buildResourceTarget(resource);
+                                        actionBuilder.buildResource(new ReferenceBuilder().buildReference(resource.getId()).build());
+                                    }
                                 }
                             }
                         }
