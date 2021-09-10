@@ -11,6 +11,7 @@ import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.PlanDefinition;
 import org.hl7.fhir.r4.model.Resource;
 import org.opencds.cqf.cql.engine.execution.Context;
+import org.opencds.cqf.cql.engine.model.ModelResolver;
 import org.opencds.cqf.cql.engine.terminology.TerminologyProvider;
 
 import java.util.ArrayList;
@@ -20,8 +21,8 @@ import java.util.stream.Collectors;
 public class R4EvaluationContext extends EvaluationContext<PlanDefinition> {
 
     public R4EvaluationContext(Hook hook, FhirVersionEnum fhirVersion, IGenericClient fhirClient,
-            TerminologyProvider terminologyProvider, Context context, Library library, PlanDefinition planDefinition, ProviderConfiguration providerConfiguration) {
-        super(hook, fhirVersion, fhirClient, context, library, planDefinition, providerConfiguration);
+            TerminologyProvider terminologyProvider, Context context, Library library, PlanDefinition planDefinition, ProviderConfiguration providerConfiguration, ModelResolver modelResolver) {
+        super(hook, fhirVersion, fhirClient, context, library, planDefinition, providerConfiguration, modelResolver);
     }
 
     @Override
