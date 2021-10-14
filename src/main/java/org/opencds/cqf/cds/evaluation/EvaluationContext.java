@@ -12,10 +12,7 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.opencds.cqf.cql.engine.data.CompositeDataProvider;
 import org.opencds.cqf.cql.engine.data.DataProvider;
 import org.opencds.cqf.cql.engine.execution.Context;
-import org.opencds.cqf.cql.engine.fhir.model.Dstu2FhirModelResolver;
-import org.opencds.cqf.cql.engine.fhir.model.Dstu3FhirModelResolver;
 import org.opencds.cqf.cql.engine.model.ModelResolver;
-import org.opencds.cqf.cql.engine.fhir.model.R4FhirModelResolver;
 import org.opencds.cqf.cql.engine.fhir.retrieve.RestFhirRetrieveProvider;
 import org.opencds.cqf.cql.engine.fhir.searchparam.SearchParameterResolver;
 import org.opencds.cqf.cql.engine.terminology.TerminologyProvider;
@@ -48,8 +45,10 @@ public abstract class EvaluationContext<T extends IBaseResource> {
 
     private ProviderConfiguration providerConfiguration;
 
+    private ModelResolver modelResolver;
+
     public EvaluationContext(Hook hook, FhirVersionEnum fhirVersion, IGenericClient fhirClient, Context context,
-            Library library, T planDefinition, ProviderConfiguration providerConfiguration) {
+            Library library, T planDefinition, ProviderConfiguration providerConfiguration, ModelResolver modelResolver) {
 
         // How to determine if it's a local server?
         // Local Server url?
@@ -58,7 +57,7 @@ public abstract class EvaluationContext<T extends IBaseResource> {
 
         this.hook = hook;
         this.fhirVersion = fhirVersion;
-        this.fhirContext = new FhirContext(fhirVersion);
+        this.fhirContext = FhirContext.forCached(fhirVersion);
         this.context = context;
         this.planDefinition = planDefinition;
         this.library = library;
@@ -66,6 +65,7 @@ public abstract class EvaluationContext<T extends IBaseResource> {
         this.client = fhirClient;
 
         this.providerConfiguration = providerConfiguration;
+        this.modelResolver = modelResolver;
 
         context.registerDataProvider("http://hl7.org/fhir", getDataProvider());
     }
@@ -102,19 +102,16 @@ public abstract class EvaluationContext<T extends IBaseResource> {
 
     private DataProvider getDataProvider() {
         if (remoteProvider == null) {
-            ModelResolver resolver;
+            ModelResolver resolver = modelResolver;
             TerminologyProvider terminologyProvider;
             switch (fhirVersion) {
                 case DSTU2:
-                    resolver = new Dstu2FhirModelResolver();
                     terminologyProvider = new Dstu3FhirTerminologyProvider(this.getSystemFhirClient());
                     break;
                 case DSTU3:
-                    resolver = new Dstu3FhirModelResolver();
                     terminologyProvider = new Dstu3FhirTerminologyProvider(this.getSystemFhirClient());
                     break;
                 case R4:
-                    resolver = new R4FhirModelResolver();
                     terminologyProvider = new R4FhirTerminologyProvider(this.getSystemFhirClient());
                     break;
                 default:

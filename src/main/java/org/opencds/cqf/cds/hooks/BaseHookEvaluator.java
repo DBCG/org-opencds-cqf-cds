@@ -13,12 +13,8 @@ import org.cqframework.cql.elm.execution.ListTypeSpecifier;
 import org.cqframework.cql.elm.execution.ParameterDef;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.opencds.cqf.cql.engine.data.CompositeDataProvider;
-import org.opencds.cqf.cql.engine.data.DataProvider;
 import org.opencds.cqf.cql.engine.execution.Context;
-import org.opencds.cqf.cql.engine.fhir.model.Dstu2FhirModelResolver;
-import org.opencds.cqf.cql.engine.fhir.model.Dstu3FhirModelResolver;
 import org.opencds.cqf.cql.engine.model.ModelResolver;
-import org.opencds.cqf.cql.engine.fhir.model.R4FhirModelResolver;
 import org.opencds.cqf.cql.engine.fhir.retrieve.RestFhirRetrieveProvider;
 import org.opencds.cqf.cql.engine.retrieve.TerminologyAwareRetrieveProvider;
 import org.opencds.cqf.cql.engine.fhir.searchparam.SearchParameterResolver;
@@ -26,7 +22,14 @@ import org.opencds.cqf.cql.engine.fhir.searchparam.SearchParameterResolver;
 import java.io.IOException;
 import java.util.List;
 
+
 public abstract class BaseHookEvaluator<P extends IBaseResource> {
+
+    protected ModelResolver modelResolver;
+
+    public BaseHookEvaluator(ModelResolver modelResolver) {
+        this.modelResolver = modelResolver;
+    }
 
     public List<CdsCard> evaluate(EvaluationContext<P> context) throws IOException {
 
@@ -50,19 +53,13 @@ public abstract class BaseHookEvaluator<P extends IBaseResource> {
         remoteRetriever.setSearchStyle(context.getProviderConfiguration().getSearchStyle());
 
         TerminologyAwareRetrieveProvider prefetchRetriever;
-        ModelResolver resolver;
         if (context.getFhirVersion() == FhirVersionEnum.DSTU3) {
-            prefetchRetriever = new PrefetchDataProviderStu3(context.getPrefetchResources());
-            resolver = new Dstu3FhirModelResolver();
-
+            prefetchRetriever = new PrefetchDataProviderStu3(context.getPrefetchResources(), modelResolver);
         } else if (context.getFhirVersion() == FhirVersionEnum.DSTU2) {
-            prefetchRetriever = new PrefetchDataProviderDstu2(context.getPrefetchResources());
-            resolver = new Dstu2FhirModelResolver();
+            prefetchRetriever = new PrefetchDataProviderDstu2(context.getPrefetchResources(), modelResolver);
         }
-
         else {
-            prefetchRetriever = new PrefetchDataProviderR4(context.getPrefetchResources());
-            resolver = new R4FhirModelResolver();
+            prefetchRetriever = new PrefetchDataProviderR4(context.getPrefetchResources(), modelResolver);
         }
 
         // TODO: Get the "system" terminology provider.
@@ -70,7 +67,7 @@ public abstract class BaseHookEvaluator<P extends IBaseResource> {
 
         PriorityRetrieveProvider priorityRetrieveProvider = new PriorityRetrieveProvider(prefetchRetriever, remoteRetriever);
         context.getContext().registerDataProvider("http://hl7.org/fhir",
-                new CompositeDataProvider(resolver, priorityRetrieveProvider));
+                new CompositeDataProvider(this.modelResolver, priorityRetrieveProvider));
         context.getContext().registerTerminologyProvider(prefetchRetriever.getTerminologyProvider());
 
         return evaluateCdsHooksPlanDefinition(context.getContext(), context.getPlanDefinition(),

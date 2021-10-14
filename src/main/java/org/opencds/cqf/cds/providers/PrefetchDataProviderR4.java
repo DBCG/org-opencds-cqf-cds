@@ -8,8 +8,7 @@ import java.util.Map;
 
 import org.opencds.cqf.cql.engine.elm.execution.InEvaluator;
 import org.opencds.cqf.cql.engine.elm.execution.IncludesEvaluator;
-import org.opencds.cqf.cql.engine.fhir.model.FhirModelResolver;
-import org.opencds.cqf.cql.engine.fhir.model.R4FhirModelResolver;
+import org.opencds.cqf.cql.engine.model.ModelResolver;
 import org.opencds.cqf.cql.engine.retrieve.TerminologyAwareRetrieveProvider;
 import org.opencds.cqf.cql.engine.runtime.Code;
 import org.opencds.cqf.cql.engine.runtime.DateTime;
@@ -17,18 +16,20 @@ import org.opencds.cqf.cql.engine.runtime.Interval;
 import org.opencds.cqf.cql.engine.terminology.ValueSetInfo;
 import org.opencds.cqf.cql.evaluator.engine.util.CodeUtil;
 
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.FhirVersionEnum;
+
 public class PrefetchDataProviderR4 extends TerminologyAwareRetrieveProvider {
 
     private Map<String, List<Object>> prefetchResources;
-    private FhirModelResolver resolver;
+    private ModelResolver resolver;
     private CodeUtil codeUtil;
 
-    public PrefetchDataProviderR4(List<Object> resources) {
+    public PrefetchDataProviderR4(List<Object> resources, ModelResolver modelResolver) {
         prefetchResources = PrefetchDataProviderHelper.populateMap(resources);
-        this.resolver = new R4FhirModelResolver();
-        this.codeUtil = new CodeUtil(this.resolver.getFhirContext());
+        this.resolver = modelResolver;
+        this.codeUtil = new CodeUtil(FhirContext.forCached(FhirVersionEnum.R4));
     }
-
     @Override
     public Iterable<Object> retrieve(String context, String contextPath, Object contextValue, String dataType,
             String templateId, String codePath, Iterable<Code> codes, String valueSet, String datePath,

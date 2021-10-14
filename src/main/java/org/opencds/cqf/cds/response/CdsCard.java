@@ -1,6 +1,5 @@
 package org.opencds.cqf.cds.response;
 
-import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.parser.IParser;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;

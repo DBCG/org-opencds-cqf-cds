@@ -8,7 +8,7 @@ import org.opencds.cqf.cds.response.STU3CarePlanToCdsCard;
 import org.opencds.cqf.cds.response.CdsCard;
 import org.hl7.fhir.dstu3.model.*;
 import org.opencds.cqf.cql.engine.execution.Context;
-import org.opencds.cqf.cql.engine.fhir.model.Dstu3FhirModelResolver;
+import org.opencds.cqf.cql.engine.model.ModelResolver;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -16,6 +16,10 @@ import java.util.List;
 import java.util.UUID;
 
 public class Stu3HookEvaluator extends BaseHookEvaluator<PlanDefinition> {
+
+    public Stu3HookEvaluator(ModelResolver modelResolver) {
+        super(modelResolver);
+    }
 
     @Override
     public List<CdsCard> evaluateCdsHooksPlanDefinition(Context context, PlanDefinition planDefinition,

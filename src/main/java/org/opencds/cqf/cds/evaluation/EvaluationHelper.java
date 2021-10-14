@@ -1,25 +1,23 @@
 package org.opencds.cqf.cds.evaluation;
 
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonElement;
+
+import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.opencds.cqf.cds.hooks.Hook;
+
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.rest.api.SearchStyleEnum;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
-import org.opencds.cqf.cds.hooks.Hook;
-import org.opencds.cqf.cds.providers.ProviderConfiguration;
-import org.opencds.cqf.cds.request.JsonHelper;
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.google.gson.JsonElement;
-import org.hl7.fhir.instance.model.api.IBaseBundle;
-import org.hl7.fhir.instance.model.api.IBaseResource;
-
-import java.io.IOException;
-import java.util.*;
 
 public class EvaluationHelper {
-
-    private static final int URI_MAX_LENGTH = 8192;
-
     // This method is very forgiving. Accepts: JSON Object, JSON Array, or JSON String
     public static List<Object> resolveContextResources(JsonElement contextJson, FhirContext fhirContext) {
         List<Object> contextResources = new ArrayList<>();

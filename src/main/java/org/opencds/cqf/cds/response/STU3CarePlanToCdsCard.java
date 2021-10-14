@@ -1,6 +1,7 @@
 package org.opencds.cqf.cds.response;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.parser.IParser;
 import org.hl7.fhir.dstu3.model.*;
 
@@ -54,7 +55,7 @@ public class STU3CarePlanToCdsCard {
 
         if (requestGroup.hasAction()) {
             for (RequestGroup.RequestGroupActionComponent action : requestGroup.getAction()) {
-                IParser jsonParser = FhirContext.forDstu3().newJsonParser().setPrettyPrint(true);
+                IParser jsonParser = FhirContext.forCached(FhirVersionEnum.DSTU3).newJsonParser().setPrettyPrint(true);
                 CdsCard card = new CdsCard(jsonParser);
                 // basic
                 if (action.hasTitle()) {
