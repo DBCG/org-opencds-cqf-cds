@@ -8,6 +8,7 @@ import org.opencds.cqf.cds.response.R4CarePlanToCdsCard;
 import org.hl7.fhir.r4.model.*;
 import org.opencds.cqf.cds.builders.r4.*;
 import org.opencds.cqf.cql.engine.execution.Context;
+import org.opencds.cqf.cql.engine.fhir.model.R4FhirModelResolver;
 import org.opencds.cqf.cql.engine.model.ModelResolver;
 
 import java.util.ArrayList;

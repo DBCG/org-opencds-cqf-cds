@@ -25,7 +25,7 @@ public class DiscoveryResolutionStu3 {
 
     public void setMaxUriLength(int maxUriLength) {
         if (maxUriLength <= 0) {
-            throw new IllegalArgumentException("maxUriLength must be >0");
+            throw new IllegalArgumentException("maxUriLength must be > 0");
         }
 
         this.maxUriLength = maxUriLength;
