@@ -8,6 +8,7 @@ import org.opencds.cqf.cds.response.R4CarePlanToCdsCard;
 import org.hl7.fhir.r4.model.*;
 import org.opencds.cqf.cds.builders.r4.*;
 import org.opencds.cqf.cql.engine.execution.Context;
+import org.opencds.cqf.cql.engine.fhir.model.R4FhirModelResolver;
 import org.opencds.cqf.cql.engine.model.ModelResolver;
 
 import java.util.ArrayList;
@@ -120,6 +121,8 @@ public class R4HookEvaluator extends BaseHookEvaluator<PlanDefinition> {
                     if (action.hasSelectionBehavior()) {
                         actionBuilder.buildSelectionBehavior(RequestGroup.ActionSelectionBehavior.fromCode(action.getSelectionBehavior().toCode()));
                     }
+
+                    Resource resource = null;
                     if (action.hasDefinition()) {
                         if (action.getDefinitionCanonicalType().getValue().contains("ActivityDefinition")) {
                             Parameters inParams = new Parameters();
@@ -129,11 +132,7 @@ public class R4HookEvaluator extends BaseHookEvaluator<PlanDefinition> {
                                     .named("$apply").withParameters(inParams).useHttpGet().execute();
 
                             List<Parameters.ParametersParameterComponent> response = outParams.getParameter();
-                            Resource resource = response.get(0).getResource().setId(UUID.randomUUID().toString());
-
-                            actionBuilder.buildResourceTarget(resource);
-                            actionBuilder
-                                    .buildResource(new ReferenceBuilder().buildReference(resource.getId()).build());
+                            resource = response.get(0).getResource().setId(UUID.randomUUID().toString());
                         }
                     }
 
@@ -158,6 +157,21 @@ public class R4HookEvaluator extends BaseHookEvaluator<PlanDefinition> {
                                             .resolveExpressionRef(dynamicValue.getExpression().getExpression())
                                             .evaluate(context);
                                     actionBuilder.buildExtension(extension);
+                                } else {
+                                    if (resource != null) {
+                                        Object value = (Object) context.resolveExpressionRef(dynamicValue.getExpression().getExpression()).evaluate(context);
+
+                                        // TODO need to verify type... yay
+                                        if (value instanceof Boolean) {
+                                            value = new BooleanType((Boolean) value);
+                                        }
+
+                                        R4FhirModelResolver modelResolver = new R4FhirModelResolver();
+                                        modelResolver.setValue(resource, dynamicValue.getPath(), value);
+
+                                        actionBuilder.buildResourceTarget(resource);
+                                        actionBuilder.buildResource(new ReferenceBuilder().buildReference(resource.getId()).build());
+                                    }
                                 }
                             }
                         }
