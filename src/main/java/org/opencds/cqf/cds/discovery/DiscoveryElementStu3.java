@@ -36,8 +36,15 @@ public class DiscoveryElementStu3 implements DiscoveryElement {
 
             if (prefetchUrlList != null && !prefetchUrlList.isEmpty()) {
                 JsonObject prefetchContent = new JsonObject();
+                int itemNo = 0;
+                if (!prefetchUrlList.stream().anyMatch(p -> p.equals("Patient/{{context.patientId}}")
+                            || p.equals("Patient?_id={{context.patientId}}")
+                            || p.equals("Patient?_id=Patient/{{context.patientId}}"))) {
+                    prefetchContent.addProperty("item1", "Patient?_id={{context.patientId}}");
+                    ++itemNo;
+                }
+
                 prefetchContent.addProperty("item1", "Patient?_id={{context.patientId}}");
-                int itemNo = 1;
                 for (String item : prefetchUrlList) {
                     prefetchContent.addProperty("item" + Integer.toString(++itemNo), item);
                 }
