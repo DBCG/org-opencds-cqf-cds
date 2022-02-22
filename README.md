@@ -1,4 +1,4 @@
-# DEPRACTED
+# DEPRECATED
 
 The content of this repository has been migrated to the cqf-ruler repostory as plugin for the cqf-ruler to facilitate easier development and bug-tracking
 
